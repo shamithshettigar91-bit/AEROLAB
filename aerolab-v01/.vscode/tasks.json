@@ -1,0 +1,9 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    { "label": "AeroLab: install Python packages", "type": "shell", "command": "python -m pip install -r requirements.txt", "problemMatcher": [] },
+    { "label": "AeroLab: run dashboard", "type": "shell", "command": "python -m streamlit run dashboard/Home.py", "isBackground": true, "problemMatcher": [] },
+    { "label": "AeroLab: build game", "type": "shell", "command": "python tools/build.py", "group": "build", "problemMatcher": [] },
+    { "label": "AeroLab: test", "type": "shell", "command": "node tests/flight-tests.js", "group": { "kind": "test", "isDefault": true }, "problemMatcher": [] }
+  ]
+}

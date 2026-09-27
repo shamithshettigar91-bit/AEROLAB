@@ -1,0 +1,1198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AeroLab V0.1: Reach 100 km</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#16233A; --panel:#1D2E4A; --panel-2:#243858; --line:#34507A; --text:#E7EDF4; --muted:#9BB0C9;
+  --accent:#F2A541; --accent-ink:#2A1A00; --good:#6CC4A1; --caution:#E9C46A; --bad:#EE6A55; --data:#8FD3F4;
+  --font:'Barlow',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+  --cond:'Barlow Condensed','Arial Narrow','Roboto Condensed',system-ui,sans-serif;
+  box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --bg:#E6ECF3; --panel:#FFFFFF; --panel-2:#F2F5F9; --line:#C5D1DF; --text:#15253D; --muted:#56698A;
+    --accent:#C9781A; --accent-ink:#FFFFFF; --good:#2E8B6A; --caution:#9A7412; --bad:#C2412D; --data:#1F7FB5; color-scheme:light;
+  }
+}
+:root[data-theme="light"]{
+  --bg:#E6ECF3; --panel:#FFFFFF; --panel-2:#F2F5F9; --line:#C5D1DF; --text:#15253D; --muted:#56698A;
+  --accent:#C9781A; --accent-ink:#FFFFFF; --good:#2E8B6A; --caution:#9A7412; --bad:#C2412D; --data:#1F7FB5; color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --bg:#16233A; --panel:#1D2E4A; --panel-2:#243858; --line:#34507A; --text:#E7EDF4; --muted:#9BB0C9;
+  --accent:#F2A541; --accent-ink:#2A1A00; --good:#6CC4A1; --caution:#E9C46A; --bad:#EE6A55; --data:#8FD3F4; color-scheme:dark;
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px);height:100%}
+*,*::before,*::after{box-sizing:border-box}
+body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font:15px/1.45 var(--font);font-variant-numeric:tabular-nums}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+h1,h2,h3{font-family:var(--cond);font-weight:600;margin:0;letter-spacing:.01em}
+.muted{color:var(--muted)}
+.hidden{display:none!important}
+
+/* Header */
+.top{display:flex;align-items:center;gap:20px;padding:10px 20px;border-bottom:1px solid var(--line);background:var(--panel)}
+.brand{display:flex;align-items:baseline;gap:10px}
+.brand h1{font-size:28px;font-weight:700;letter-spacing:.02em}
+.brand span{font-family:var(--cond);color:var(--muted);font-size:15px}
+.mission-chip{margin-left:auto;display:flex;align-items:center;gap:10px;font-size:14px}
+.mission-chip b{font-family:var(--cond);font-weight:600;font-size:16px}
+.flag{width:10px;height:10px;border-radius:50%;background:var(--muted)}
+.flag.done{background:var(--good)}
+
+/* Builder */
+.builder{display:grid;grid-template-columns:290px minmax(0,1fr) 340px;gap:0;height:calc(100vh - 57px - 64px);min-height:560px}
+.col{overflow:auto;padding:16px;border-right:1px solid var(--line)}
+.col:last-child{border-right:0}
+.col h2{font-size:19px;margin-bottom:10px}
+.group{margin-bottom:14px}
+.group h3{font-size:14px;color:var(--muted);font-weight:500;margin-bottom:6px}
+.pbtn{display:block;width:100%;text-align:left;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:8px 10px;margin-bottom:6px}
+.pbtn:hover{border-color:var(--accent)}
+.pbtn strong{display:block;font-weight:600;font-size:14.5px}
+.pbtn small{color:var(--muted);font-size:13px}
+.stack{list-style:none;margin:0 0 6px;padding:0}
+.stack li{display:flex;align-items:center;gap:6px;padding:6px 8px;border:1px solid var(--line);border-bottom-width:0;background:var(--panel-2);font-size:14px}
+.stack li:first-child{border-radius:6px 6px 0 0}
+.stack li:last-child{border-bottom-width:1px;border-radius:0 0 6px 6px}
+.stack li:only-child{border-radius:6px}
+.stack li.sel{outline:2px solid var(--accent);outline-offset:-2px}
+.stack li .nm{flex:1;cursor:pointer}
+.stack li .kg{color:var(--muted);font-size:13px;min-width:52px;text-align:right}
+.ib{background:transparent;border:1px solid transparent;border-radius:4px;width:26px;height:26px;line-height:1;padding:0;color:var(--muted)}
+.ib:hover{border-color:var(--line);color:var(--text)}
+.empty{color:var(--muted);font-size:14px;padding:10px;border:1px dashed var(--line);border-radius:6px}
+.center{display:flex;flex-direction:column;padding:0;background:var(--panel-2)}
+.canvas-wrap{flex:1;position:relative;min-height:320px}
+#bcv{position:absolute;inset:0;width:100%;height:100%}
+.inspector{border-top:1px solid var(--line);padding:12px 16px;background:var(--panel);min-height:72px;font-size:14px}
+.inspector b{font-family:var(--cond);font-size:17px;font-weight:600}
+.legend{position:absolute;left:14px;bottom:12px;font-size:13px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+
+.mission{background:var(--panel-2);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:6px;padding:10px 12px;margin-bottom:16px;font-size:14px}
+.mission h3{font-size:17px;margin-bottom:4px}
+.eng{width:100%;border-collapse:collapse;font-size:14px;margin-bottom:14px}
+.eng td{padding:5px 0;border-bottom:1px solid var(--line)}
+.eng td:last-child{text-align:right;font-weight:600}
+.eng tr.sub td{font-weight:400;color:var(--muted);font-size:13px;padding-top:0}
+.st-good{color:var(--good)} .st-caution{color:var(--caution)} .st-bad{color:var(--bad)}
+.dvbar{position:relative;height:8px;background:var(--panel-2);border:1px solid var(--line);border-radius:4px;margin:6px 0 2px}
+.dvbar div{position:absolute;inset:0 auto 0 0;background:var(--accent);border-radius:3px}
+.dvbar span{position:absolute;top:-4px;bottom:-4px;width:2px;background:var(--text)}
+.issues{list-style:none;padding:0;margin:0}
+.issues li{border:1px solid var(--line);border-left:3px solid var(--caution);border-radius:6px;padding:8px 10px;margin-bottom:8px;font-size:14px;background:var(--panel)}
+.issues li.error{border-left-color:var(--bad)}
+.issues li .fix{color:var(--muted);font-size:13px;margin-top:2px}
+.ok{color:var(--good);font-size:14px}
+.models{font-size:12.5px;color:var(--muted);margin-top:16px;line-height:1.6}
+
+.bar{display:flex;align-items:center;gap:10px;padding:12px 20px;border-top:1px solid var(--line);background:var(--panel);height:64px}
+.bar input,.bar select{background:var(--panel-2);border:1px solid var(--line);border-radius:6px;padding:7px 10px;min-width:0}
+.bar input{width:150px}
+.btn{background:var(--panel-2);border:1px solid var(--line);border-radius:6px;padding:8px 14px;font-weight:500}
+.btn:hover{border-color:var(--accent)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600;font-family:var(--cond);font-size:18px;padding:7px 22px}
+.bar .spacer{flex:1}
+.bar .msg{font-size:13px;color:var(--muted)}
+
+/* Flight */
+.flight{position:fixed;inset:0;background:#000;overflow:hidden;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+#fcv{position:absolute;inset:0;width:100%;height:100%;display:block}
+.hud{position:absolute;color:#EAF1F8;text-shadow:0 1px 2px rgba(0,0,0,.5);font-variant-numeric:tabular-nums}
+.hud-l{left:16px;top:calc(14px + env(safe-area-inset-top,0px));width:230px}
+.alt{font-family:var(--cond);font-weight:700;font-size:56px;line-height:1}
+.alt small{font-size:22px;font-weight:500;margin-left:4px}
+.tplus{font-family:var(--cond);font-size:20px;opacity:.85;margin-bottom:6px}
+.readouts{display:grid;grid-template-columns:auto auto;gap:2px 14px;margin-top:10px;font-size:14.5px;background:rgba(10,20,36,.55);padding:10px 12px;border-radius:8px;backdrop-filter:blur(4px)}
+.readouts .k{opacity:.78}
+.readouts .v{text-align:right;font-weight:600;white-space:nowrap}
+.meter{height:5px;background:rgba(255,255,255,.15);border-radius:3px;margin:3px 0 8px;overflow:hidden}
+.meter div{height:100%;background:#F2A541}
+.objective{left:50%;transform:translateX(-50%);top:calc(14px + env(safe-area-inset-top,0px));background:rgba(10,20,36,.6);border-radius:20px;padding:6px 16px;font-size:14.5px;display:flex;gap:10px;align-items:center;backdrop-filter:blur(4px);white-space:nowrap}
+.objective .flag{background:#9BB0C9}
+.objective.done .flag{background:#6CC4A1}
+.hud-r{right:16px;top:calc(14px + env(safe-area-inset-top,0px));width:220px}
+#traj{width:220px;height:150px;background:rgba(10,20,36,.55);border-radius:8px;display:block}
+.log{left:16px;bottom:calc(92px + env(safe-area-inset-bottom,0px));width:340px;max-width:calc(100% - 32px);font-size:13.5px;display:flex;flex-direction:column-reverse;gap:3px;max-height:170px;overflow:hidden;pointer-events:none}
+.log div{background:rgba(10,20,36,.55);padding:3px 9px;border-radius:5px;width:max-content;max-width:100%}
+.log .good{color:#8FE0BE} .log .bad{color:#FF9C8A}
+.log b{font-weight:600;opacity:.75;margin-right:6px}
+.controls{position:absolute;left:0;right:0;bottom:0;display:flex;align-items:center;gap:10px;padding:12px 16px calc(12px + env(safe-area-inset-bottom,0px));background:linear-gradient(transparent,rgba(5,10,20,.8));color:#EAF1F8;flex-wrap:wrap}
+.controls .btn{background:rgba(29,46,74,.85);border-color:#34507A;color:#EAF1F8}
+.controls .btn.primary{background:#F2A541;border-color:#F2A541;color:#2A1A00}
+.controls .btn.on{border-color:#6CC4A1;color:#8FE0BE}
+.controls .btn.danger{border-color:#EE6A55}
+.ctl{display:flex;align-items:center;gap:8px;font-size:14px}
+.ctl input[type=range]{width:130px;accent-color:#F2A541}
+.warp{display:flex}
+.warp button{border-radius:0;margin-left:-1px;padding:8px 10px}
+.warp button:first-child{border-radius:6px 0 0 6px}
+.warp button:last-child{border-radius:0 6px 6px 0}
+.controls .warp button.on{background:#F2A541;color:#2A1A00;border-color:#F2A541;font-weight:600}
+.keys{font-size:12.5px;opacity:.7;margin-left:auto}
+kbd{font-family:var(--font);font-size:12px;border:1px solid rgba(255,255,255,.35);border-radius:3px;padding:0 4px}
+.banner{position:absolute;left:50%;top:26%;transform:translate(-50%,-50%);text-align:center;background:rgba(10,20,36,.72);border-radius:10px;padding:16px 24px;color:#EAF1F8;backdrop-filter:blur(4px)}
+.banner h2{font-size:28px}
+
+/* Report */
+.modal{position:fixed;inset:0;background:rgba(5,10,20,.66);display:flex;align-items:center;justify-content:center;padding:20px;z-index:10}
+.report{background:var(--panel);border:1px solid var(--line);border-radius:10px;width:min(980px,100%);max-height:calc(100vh - 40px);overflow:auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr)}
+.rep-l{padding:22px;border-right:1px solid var(--line)}
+.rep-r{padding:22px;display:flex;flex-direction:column}
+.verdict{font-family:var(--cond);font-size:34px;font-weight:700;line-height:1.05}
+.verdict.good{color:var(--good)} .verdict.bad{color:var(--bad)}
+.cause{font-size:17px;margin:6px 0 16px}
+.report h3{font-size:16px;color:var(--muted);font-weight:500;margin:14px 0 4px}
+.report ul{margin:0;padding-left:18px}
+.report li{margin:2px 0}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.chips button{background:var(--panel-2);border:1px solid var(--line);border-radius:14px;padding:4px 12px;font-size:13.5px}
+.chips button.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.chart-wrap{position:relative;flex:1;min-height:260px}
+#rcv{position:absolute;inset:0;width:100%;height:100%}
+.rep-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:14px}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px}
+.stats div{background:var(--panel-2);border-radius:6px;padding:8px 10px}
+.stats b{display:block;font-family:var(--cond);font-size:20px;font-weight:600;white-space:nowrap}
+.stats span{font-size:12.5px;color:var(--muted)}
+
+@media (max-width: 900px){
+  .builder{grid-template-columns:1fr;height:auto}
+  .top{padding:10px 14px;gap:12px}
+  .brand span{display:none}
+  .mission-chip{font-size:13px;line-height:1.3}
+  .bar input{width:110px}
+  .center{order:-1;height:62vh}
+  .col{border-right:0;border-bottom:1px solid var(--line)}
+  .bar{position:sticky;bottom:0;height:auto;flex-wrap:wrap}
+  .report{grid-template-columns:1fr}
+  .rep-l{border-right:0;border-bottom:1px solid var(--line)}
+  .stats{grid-template-columns:repeat(2,1fr)}
+  .hud-r{display:none}
+  .alt{font-size:42px}
+  .readouts{font-size:13px}
+  .keys{display:none}
+  .objective{top:auto;bottom:calc(150px + env(safe-area-inset-bottom,0px))}
+  .log{display:none}
+}
+@media (prefers-reduced-motion: reduce){ *{scroll-behavior:auto!important} }
+</style>
+</head>
+<body>
+<div id="app">
+  <header class="top">
+    <div class="brand"><h1>AeroLab</h1><span>V0.1 prototype</span></div>
+    <div class="mission-chip"><span class="flag" id="missionFlag"></span><span><b>Mission 002</b> Carry the science payload above 100 km</span></div>
+  </header>
+
+  <main class="builder" id="builder">
+    <section class="col" aria-label="Parts">
+      <h2>Parts</h2>
+      <div id="palette"></div>
+    </section>
+
+    <section class="center" aria-label="Vehicle">
+      <div class="canvas-wrap">
+        <canvas id="bcv" aria-label="Side view of your vehicle"></canvas>
+        <div class="legend"><span><i style="background:var(--data)"></i>Centre of gravity, full and empty</span><span><i style="background:var(--accent)"></i>Centre of pressure</span></div>
+      </div>
+      <div class="inspector" id="inspector"></div>
+    </section>
+
+    <section class="col" aria-label="Engineering">
+      <div class="mission">
+        <h3>Reach space with a science payload</h3>
+        Carry the payload past the Kármán line at 100 km, where space begins by convention. One stage, one engine. Build a vehicle, check the numbers below, then launch.
+      </div>
+      <h2>Your stack</h2>
+      <ul class="stack" id="stack"></ul>
+      <div id="finsRow"></div>
+      <h2 style="margin-top:16px">Engineering</h2>
+      <table class="eng" id="engTable"></table>
+      <h2>Checks</h2>
+      <ul class="issues" id="issues"></ul>
+      <div class="models" id="models"></div>
+    </section>
+  </main>
+
+  <footer class="bar" id="bbar">
+    <label for="dname" class="muted" style="font-size:13px">Design</label>
+    <input id="dname" value="Sounder" maxlength="24">
+    <button class="btn" id="saveBtn">Save version</button>
+    <select id="loadSel" aria-label="Load a saved design"><option value="">Load design</option></select>
+    <span class="msg" id="barMsg"></span>
+    <span class="spacer"></span>
+    <span class="msg" id="launchMsg"></span>
+    <button class="btn primary" id="launchBtn">Go to launch pad</button>
+  </footer>
+</div>
+
+<div class="flight hidden" id="flight">
+  <canvas id="fcv"></canvas>
+  <div class="hud hud-l">
+    <div class="tplus" id="tplus">T– 00:00</div>
+    <div class="alt" id="hAlt">0.00<small>km</small></div>
+    <div class="readouts" id="readouts"></div>
+  </div>
+  <div class="hud objective" id="objective"><span class="flag"></span><span id="objText">Payload above 100 km</span></div>
+  <div class="hud hud-r"><canvas id="traj" width="220" height="150" aria-label="Trajectory: altitude against downrange distance"></canvas></div>
+  <div class="hud log" id="log"></div>
+  <div class="banner hidden" id="banner"></div>
+  <div class="controls">
+    <button class="btn primary" id="igniteBtn">Ignite</button>
+    <button class="btn danger hidden" id="cutBtn">Cut engine</button>
+    <div class="ctl" id="thrCtl"><span>Throttle</span><input type="range" id="thr" min="40" max="100" value="100" step="5" aria-label="Throttle"><span id="thrVal">100%</span></div>
+    <button class="btn" id="pl" aria-label="Pitch west">◀ Pitch</button>
+    <button class="btn" id="pr" aria-label="Pitch east">Pitch ▶</button>
+    <button class="btn on" id="sasBtn">Hold attitude on</button>
+    <div class="warp" id="warp" role="group" aria-label="Time warp"></div>
+    <button class="btn" id="endBtn">End flight</button>
+    <span class="keys"><kbd>Space</kbd> ignite <kbd>W</kbd><kbd>S</kbd> throttle <kbd>A</kbd><kbd>D</kbd> pitch <kbd>T</kbd> hold <kbd>,</kbd><kbd>.</kbd> warp <kbd>X</kbd> cut <kbd>Esc</kbd> end</span>
+  </div>
+</div>
+
+<div class="modal hidden" id="modal" role="dialog" aria-modal="true" aria-labelledby="verdict">
+  <div class="report">
+    <div class="rep-l" id="repL"></div>
+    <div class="rep-r">
+      <div class="stats" id="repStats"></div>
+      <div class="chips" id="chips"></div>
+      <div class="chart-wrap"><canvas id="rcv" aria-label="Telemetry chart"></canvas></div>
+      <div class="rep-actions">
+        <button class="btn" id="againBtn">Fly again</button>
+        <button class="btn primary" id="backBtn">Back to builder</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ================= AEROLAB SIMULATION CORE (pure, no rendering) =================
+// All internal units SI: kg, m, s, N, Pa, K, rad.
+const G0 = 9.80665, MU = 3.986004418e14, RE = 6371000, WE = -7.2921159e-5;
+const P0 = 101325, RAIR = 287.053, DIAM = 0.6, AREF = Math.PI * (DIAM / 2) ** 2;
+const DEG = Math.PI / 180;
+const MODEL = { physics: 'AeroModel 0.1', atmosphere: 'US76-lite 1.0', gravity: 'PointMass 1.0', integrator: 'RK4 at 100 Hz' };
+
+// ---------- Part definitions (data, not code) ----------
+const PARTS = {
+  nose_ogive: { cat: 'nose', name: 'Ogive nose cone', mass: 18, len: 1.2, cd: 0.15, cna: 2, cpFrac: 0.466, qMax: 150000,
+    note: 'Low drag. The pointed shape keeps pressure forward.' },
+  nose_cone: { cat: 'nose', name: 'Conical nose cone', mass: 12, len: 0.8, cd: 0.24, cna: 2, cpFrac: 0.667, qMax: 150000,
+    note: 'Lighter and shorter, but more drag.' },
+  payload_sci: { cat: 'payload', name: 'Science payload', mass: 25, len: 0.6, qMax: 120000, gMax: 15, payload: 10,
+    note: '10 kg instrument in a 15 kg housing. Survives up to 15 g.' },
+  payload_heavy: { cat: 'payload', name: 'Heavy payload', mass: 85, len: 0.9, qMax: 120000, gMax: 12, payload: 60,
+    note: '60 kg instrument package. Survives up to 12 g.' },
+  avionics: { cat: 'avionics', name: 'Flight computer', mass: 12, len: 0.3, qMax: 150000,
+    note: 'Commands engine gimbal and holds attitude. Liquid engines need one.' },
+  tank_s: { cat: 'tank', name: 'Propellant tank S', mass: 40, prop: 160, len: 1.0, qMax: 120000,
+    note: '160 kg kerosene and liquid oxygen.' },
+  tank_m: { cat: 'tank', name: 'Propellant tank M', mass: 70, prop: 330, len: 2.0, qMax: 120000,
+    note: '330 kg kerosene and liquid oxygen.' },
+  tank_l: { cat: 'tank', name: 'Propellant tank L', mass: 100, prop: 500, len: 3.0, qMax: 120000,
+    note: '500 kg kerosene and liquid oxygen.' },
+  eng_sparrow: { cat: 'engine', type: 'liquid', name: 'LR-12 Sparrow', mass: 55, len: 0.9, tvac: 16000, ispSL: 250, ispVac: 285, gimbal: 5 * DEG, qMax: 150000,
+    note: 'Small liquid engine. Throttles 40–100%, gimbals 5°.' },
+  eng_heron: { cat: 'engine', type: 'liquid', name: 'LR-40 Heron', mass: 110, len: 1.3, tvac: 42000, ispSL: 262, ispVac: 298, gimbal: 4 * DEG, qMax: 150000,
+    note: 'Powerful liquid engine. Throttles 40–100%, gimbals 4°.' },
+  srm_needle: { cat: 'engine', type: 'solid', name: 'SR-9 Needle solid motor', mass: 140, prop: 600, len: 4.0, tvac: 24000, ispSL: 228, ispVac: 252, gimbal: 0, qMax: 150000,
+    note: 'Carries its own 600 kg propellant. Cannot throttle, steer or shut down.' },
+  fins_s: { cat: 'fins', name: 'Small fin set', mass: 10, cna: 6, cd: 0.03,
+    note: 'Four fins at the tail. Moves the centre of pressure aft.' },
+  fins_l: { cat: 'fins', name: 'Large fin set', mass: 20, cna: 11, cd: 0.06,
+    note: 'Strong stability at the cost of mass and drag.' },
+};
+const LIMITS = { qAlpha: 4500 }; // Pa·rad bending limit (q × sin α)
+
+// ---------- Atmosphere (US Standard 1976, simplified) ----------
+const LAY = [
+  [0, 288.15, -0.0065, 101325], [11000, 216.65, 0, 22632.1], [20000, 216.65, 0.001, 5474.89],
+  [32000, 228.65, 0.0028, 868.019], [47000, 270.65, 0, 110.906], [51000, 270.65, -0.0028, 66.9389],
+  [71000, 214.65, -0.002, 3.95642], [86000, 184.65, 0, 0.30230]];
+function atmosphere(h) {
+  if (h < 0) h = 0;
+  let k = LAY.length - 1; while (k > 0 && h < LAY[k][0]) k--;
+  const [hb, Tb, Lr, pb] = LAY[k]; const dh = h - hb;
+  let T, p;
+  if (Lr === 0) { T = Tb; p = pb * Math.exp(-G0 * dh / (RAIR * Tb)); }
+  else { T = Tb + Lr * dh; p = pb * Math.pow(T / Tb, -G0 / (RAIR * Lr)); }
+  return { T, p, rho: p / (RAIR * T), a: Math.sqrt(1.4 * RAIR * T) };
+}
+
+// ---------- Vehicle assembly ----------
+function buildVehicle(design) {
+  const items = []; let s = 0;
+  for (const id of design.stack) {
+    const def = PARTS[id]; if (!def) continue;
+    items.push({ id, def, sTop: s, sMid: s + def.len / 2, sBot: s + def.len }); s += def.len;
+  }
+  const L = Math.max(s, 0.1);
+  const fins = design.fins ? PARTS[design.fins] : null;
+  const engIt = items.find(i => i.def.cat === 'engine') || null;
+  const eng = engIt ? engIt.def : null;
+  const tanks = items.filter(i => i.def.cat === 'tank');
+  const containers = !eng ? [] : (eng.type === 'solid' ? [engIt] : tanks);
+  const propCap = containers.reduce((a, i) => a + i.def.prop, 0);
+  const deadProp = eng && eng.type === 'solid' ? tanks.reduce((a, i) => a + i.def.prop, 0) : (eng ? 0 : tanks.reduce((a, i) => a + i.def.prop, 0));
+  const sFin = L - 0.45;
+  let dryMass = items.reduce((a, i) => a + i.def.mass, 0) + (fins ? fins.mass : 0) + deadProp;
+  // aerodynamics: Barrowman-style normal force slopes
+  const top = items[0];
+  const hasNoseTop = top && top.def.cat === 'nose';
+  const aeroTerms = [];
+  aeroTerms.push(hasNoseTop ? [top.def.cna, top.def.len * top.def.cpFrac] : [2, 0.05]);
+  if (fins) aeroTerms.push([fins.cna, sFin]);
+  const cna = aeroTerms.reduce((a, t) => a + t[0], 0);
+  const cp = aeroTerms.reduce((a, t) => a + t[0] * t[1], 0) / cna;
+  const cd0 = (hasNoseTop ? top.def.cd : 0.8) + 0.012 * L + (fins ? fins.cd : 0);
+  const mdotMax = eng ? eng.tvac / (eng.ispVac * G0) : 0;
+  const qMax = Math.min(...items.map(i => i.def.qMax || 1e9));
+  const payloads = items.filter(i => i.def.cat === 'payload');
+  const gMax = payloads.length ? Math.min(...payloads.map(p => p.def.gMax)) : 99;
+  const sEng = engIt ? engIt.sTop + 0.25 : L;
+  const hasComputer = items.some(i => i.def.cat === 'avionics');
+  return { design, items, L, fins, sFin, eng, engIt, containers, propCap, deadProp, dryMass, aeroTerms, cna, cp, cd0,
+    mdotMax, qMax, gMax, sEng, hasComputer, payloads };
+}
+
+function massProps(veh, prop) {
+  const frac = veh.propCap > 0 ? Math.max(prop, 0) / veh.propCap : 0;
+  const pts = [];
+  for (const it of veh.items) {
+    let m = it.def.mass;
+    if (veh.containers.includes(it)) m += it.def.prop * frac;
+    else if (it.def.prop && it.def.cat === 'tank') m += it.def.prop; // dead propellant
+    pts.push([m, it.sMid, it.def.len]);
+  }
+  if (veh.fins) pts.push([veh.fins.mass, veh.sFin, 0.8]);
+  let m = 0, ms = 0; for (const p of pts) { m += p[0]; ms += p[0] * p[1]; }
+  const cg = m > 0 ? ms / m : 0;
+  let I = 0; for (const p of pts) I += p[0] * ((p[1] - cg) ** 2 + p[2] * p[2] / 12);
+  let damp = 0.05; for (const t of veh.aeroTerms) damp += 0.5 * t[0] * ((t[1] - cg) / veh.L) ** 2;
+  return { m, cg, I: Math.max(I, 1), damp };
+}
+
+// ---------- Static engineering analysis (builder panel) ----------
+function analyze(design) {
+  const veh = buildVehicle(design);
+  const full = massProps(veh, veh.propCap), empty = massProps(veh, 0);
+  const e = veh.eng;
+  const r = { veh, wet: full.m, dry: empty.m, prop: veh.propCap, cgFull: full.cg, cgEmpty: empty.cg, cp: veh.cp, L: veh.L,
+    smFull: (veh.cp - full.cg) / DIAM, smEmpty: (veh.cp - empty.cg) / DIAM, twr: 0, dvVac: 0, dvSL: 0, burn: 0, issues: [] };
+  if (e) {
+    const tSL = veh.mdotMax * e.ispSL * G0;
+    r.thrustSL = tSL; r.thrustVac = e.tvac; r.twr = tSL / (full.m * G0);
+    if (veh.propCap > 0) {
+      r.dvVac = e.ispVac * G0 * Math.log(full.m / empty.m);
+      r.dvSL = e.ispSL * G0 * Math.log(full.m / empty.m);
+      r.burn = veh.propCap / veh.mdotMax;
+    }
+  }
+  const I = r.issues, st = design.stack;
+  const add = (level, text, part, fix) => I.push({ level, text, part, fix });
+  const engines = veh.items.filter(i => i.def.cat === 'engine');
+  if (st.length === 0) add('error', 'The vehicle has no parts yet.', null, 'Add a nose cone, payload, tank and engine from the parts list.');
+  if (engines.length === 0 && st.length) add('error', 'The vehicle has no engine.', null, 'Add an engine at the bottom of the stack.');
+  if (engines.length > 1) add('error', 'Only one engine is supported in V0.1.', engines[1].def.name, 'Remove the extra engine. Staging arrives in V0.2.');
+  if (engines.length && veh.items[veh.items.length - 1].def.cat !== 'engine') add('error', 'The engine is not at the bottom of the stack.', engines[0].def.name, 'Move the engine to the bottom.');
+  const noses = veh.items.filter(i => i.def.cat === 'nose');
+  if (noses.length > 1) add('error', 'The vehicle has more than one nose cone.', noses[1].def.name, 'Remove the extra nose cone.');
+  if (noses.length && veh.items[0].def.cat !== 'nose') add('error', 'The nose cone is not at the top.', noses[0].def.name, 'Move the nose cone to the top of the stack.');
+  if (!noses.length && st.length) add('warn', 'No nose cone. A flat top creates heavy drag.', null, 'Add a nose cone.');
+  if (!veh.payloads.length && st.length) add('error', 'The mission needs a science payload on board.', null, 'Add a payload section.');
+  if (e && e.type === 'liquid') {
+    if (!veh.items.some(i => i.def.cat === 'tank')) add('error', 'The engine has no propellant supply.', e.name, 'Add a propellant tank above the engine.');
+    if (!veh.hasComputer) add('error', 'The liquid engine has no flight computer to command it.', e.name, 'Add a flight computer.');
+  }
+  if (e && e.type === 'solid' && veh.items.some(i => i.def.cat === 'tank'))
+    add('warn', 'Liquid tanks cannot feed a solid motor. Their propellant is dead weight.', 'Propellant tank', 'Remove the tanks.');
+  if (e && r.twr > 0 && r.twr < 1) add('warn', `Lift-off thrust-to-weight is ${r.twr.toFixed(2)}. The vehicle will not leave the pad.`, e.name, 'Use a stronger engine or remove mass.');
+  if (e && r.smFull < 0) add('warn', `The vehicle is aerodynamically unstable (margin ${r.smFull.toFixed(1)} cal).` +
+    (e.gimbal > 0 ? ' The gimbal must fight to keep it straight.' : ' A solid motor cannot steer, so it will tumble.'), null, 'Add fins to move the centre of pressure behind the centre of gravity.');
+  else if (e && r.smFull < 1 && veh.fins) add('warn', `Stability margin is thin (${r.smFull.toFixed(1)} cal). One to two calibres is typical.`, null, 'Use larger fins.');
+  r.valid = !I.some(i => i.level === 'error');
+  return r;
+}
+
+// ---------- Orbit calculation ----------
+function orbitApo(x, y, vx, vy) {
+  const r = Math.hypot(x, y), v2 = vx * vx + vy * vy;
+  const eps = v2 / 2 - MU / r; if (eps >= 0) return Infinity;
+  const h = x * vy - y * vx, a = -MU / (2 * eps);
+  const e = Math.sqrt(Math.max(0, 1 + 2 * eps * h * h / (MU * MU)));
+  return a * (1 + e) - RE;
+}
+
+// ---------- Drag coefficient ----------
+function machFactor(M) {
+  if (M < 0.8) return 1;
+  if (M < 1.05) return 1 + (M - 0.8) / 0.25 * 0.9;
+  if (M < 1.3) return 1.9 - (M - 1.05) / 0.25 * 0.3;
+  return Math.max(1.05, 1.6 - (M - 1.3) * 0.2);
+}
+
+// ---------- Flight simulation ----------
+class Flight {
+  constructor(design) {
+    this.veh = buildVehicle(design);
+    const v = this.veh;
+    this.t = 0; this.prop = v.propCap;
+    this.x = 0; this.y = RE; this.vx = -WE * RE; this.vy = 0; this.th = Math.PI / 2; this.om = WE;
+    this.clamped = true; this.engine = 'off'; this.ignT = 0; this.throttleCmd = 1; this.throttle = 0;
+    this.gimbal = 0; this.sas = v.hasComputer; this.targetPitch = 90; this.pitchInput = 0;
+    this.misalign = 0.15 * DEG; // small thrust misalignment, as on any real vehicle
+    this.events = []; this.tele = []; this.teleNext = 0;
+    this.max = { alt: 0, q: 0, g: 0, mach: 0, speed: 0 };
+    this.loss = { grav: 0, drag: 0, delivered: 0 }; this.liftoffT = null; this.apogeeT = null; this.reached = false;
+    this.done = false; this.failure = null; this.qRising = true; this.mach1 = false; this.burnout = false;
+    this.d = this.derived(); this.sensedG = 1;
+  }
+  log(msg, kind = 'info') { this.events.push({ t: this.t, msg, kind }); }
+  ignite() {
+    if (this.engine !== 'off' || !this.veh.eng || this.veh.propCap <= 0) return;
+    this.engine = 'ignition'; this.ignT = this.t; this.log('Ignition');
+  }
+  shutdown() {
+    if (!this.veh.eng || this.veh.eng.type === 'solid') return false;
+    if (this.engine === 'running' || this.engine === 'ignition') { this.engine = 'shutdown'; this.log('Engine cut-off commanded'); return true; }
+    return false;
+  }
+  setThrottle(v) { if (this.veh.eng && this.veh.eng.type === 'liquid') this.throttleCmd = Math.min(1, Math.max(0.4, v)); }
+
+  localFrame(x, y) { const r = Math.hypot(x, y); const ux = x / r, uy = y / r; return { ux, uy, ex: uy, ey: -ux }; }
+  pitchOf(th, x, y) { const f = this.localFrame(x, y); const bx = Math.cos(th), by = Math.sin(th); return Math.atan2(bx * f.ux + by * f.uy, bx * f.ex + by * f.ey) / DEG; }
+
+  deriv(S, mp) {
+    const [x, y, vx, vy, th, om, prop] = S, v = this.veh;
+    const r = Math.hypot(x, y), alt = r - RE, m = v.dryMass + Math.max(prop, 0);
+    const atm = atmosphere(alt);
+    const gm = MU / (r * r);
+    let fx = -gm * x / r * m, fy = -gm * y / r * m, tau = 0;
+    const bx = Math.cos(th), by = Math.sin(th);
+    let T = 0, mdot = 0;
+    if (this.throttle > 0 && prop > 0) {
+      const e = v.eng; mdot = v.mdotMax * this.throttle;
+      T = mdot * G0 * (e.ispVac - (e.ispVac - e.ispSL) * atm.p / P0);
+      const d = this.gimbal + this.misalign, tx = bx * Math.cos(d) - by * Math.sin(d), ty = bx * Math.sin(d) + by * Math.cos(d);
+      fx += T * tx; fy += T * ty;
+      const arm = v.sEng - mp.cg; tau += -arm * bx * (T * ty) + arm * by * (T * tx);
+    }
+    const ax = vx + WE * y, ay = vy - WE * x; // air-relative velocity (atmosphere co-rotates)
+    const va = Math.hypot(ax, ay), q = 0.5 * atm.rho * va * va;
+    let D = 0, sina = 0; const tau0 = tau;
+    if (va > 0.5) {
+      const wx = -ax / va, wy = -ay / va, wb = wx * bx + wy * by, px = wx - wb * bx, py = wy - wb * by;
+      sina = Math.hypot(px, py);
+      const cd = v.cd0 * machFactor(va / atm.a) + (T > 0 ? 0 : 0.12) + 1.5 * sina * sina;
+      D = q * AREF * cd; fx += D * wx; fy += D * wy;
+      const N = q * AREF * v.cna; fx += N * px; fy += N * py;
+      const arm = v.cp - mp.cg; tau += -arm * bx * (N * py) + arm * by * (N * px);
+      tau += -mp.damp * q * AREF * v.L * v.L * om / Math.max(va, 20);
+    }
+    this._aux = { tauAero: tau - tau0, T, D, q, mach: va / atm.a, sina, m, atm, alt, va, gm, fxNG: fx + gm * x / r * m, fyNG: fy + gm * y / r * m };
+    return [vx, vy, fx / m, fy / m, om, tau / mp.I, -mdot];
+  }
+
+  control(dt) {
+    const v = this.veh, e = v.eng;
+    // engine state machine: OFF → IGNITION → RUNNING → SHUTDOWN / BURNOUT
+    if (this.engine === 'ignition') {
+      const k = Math.min(1, (this.t - this.ignT) / 0.6); this.throttle = k * this.throttleCmd;
+      if (k >= 1) { this.engine = 'running'; }
+    } else if (this.engine === 'running') {
+      this.throttle += Math.max(-dt * 1.5, Math.min(dt * 1.5, this.throttleCmd - this.throttle));
+    } else this.throttle = 0;
+    // attitude: SAS holds target pitch using the gimbal
+    let cmd = 0;
+    const T = this.throttle > 0 && e ? v.mdotMax * this.throttle * G0 * e.ispVac : 0;
+    if (e && e.gimbal > 0 && T > 0) {
+      const mp = this.mp;
+      if (this.sas) {
+        this.targetPitch = Math.max(0, Math.min(90, this.targetPitch - this.pitchInput * 10 * dt));
+        const f = this.localFrame(this.x, this.y);
+        const thT = Math.atan2(f.ey, f.ex) + this.targetPitch * DEG;
+        let err = thT - this.th; err = Math.atan2(Math.sin(err), Math.cos(err));
+        this.iErr = Math.max(-0.2, Math.min(0.2, (this.iErr || 0) + err * dt));
+        const tauReq = mp.I * (12 * err + 4 * this.iErr - 7 * (this.om - WE)) - (this.tauAero || 0);
+        const arm = v.sEng - mp.cg;
+        const s = -tauReq / Math.max(arm * T, 1);
+        cmd = Math.asin(Math.max(-Math.sin(e.gimbal), Math.min(Math.sin(e.gimbal), s)));
+      } else cmd = this.pitchInput * e.gimbal;
+    }
+    const rate = 20 * DEG * dt; this.gimbal += Math.max(-rate, Math.min(rate, cmd - this.gimbal));
+  }
+
+  step(dt) {
+    if (this.done) return;
+    const v = this.veh;
+    this.mp = massProps(v, this.prop);
+    this.control(dt);
+    const S = [this.x, this.y, this.vx, this.vy, this.th, this.om, this.prop];
+    if (this.clamped) {
+      const k1 = this.deriv(S, this.mp); const a = this._aux;
+      const f = this.localFrame(this.x, this.y);
+      const up = (a.fxNG) * f.ux + (a.fyNG) * f.uy; // thrust along local up
+      if (a.T > 0 && up > a.m * a.gm * 1.0) { this.clamped = false; this.liftoffT = this.t; this.log('Lift-off', 'good'); }
+      else {
+        this.prop = Math.max(0, this.prop + k1[6] * dt);
+        this.t += dt; const ang = Math.PI / 2 + WE * this.t;
+        this.x = RE * Math.cos(ang); this.y = RE * Math.sin(ang); this.vx = -WE * this.y; this.vy = WE * this.x; this.th = ang; this.om = WE;
+        this.after(dt, k1);
+        return;
+      }
+    }
+    const k1 = this.deriv(S, this.mp);
+    const aux1 = this._aux; this.tauAero = aux1.tauAero;
+    const S2 = S.map((s, i) => s + k1[i] * dt / 2), k2 = this.deriv(S2, this.mp);
+    const S3 = S.map((s, i) => s + k2[i] * dt / 2), k3 = this.deriv(S3, this.mp);
+    const S4 = S.map((s, i) => s + k3[i] * dt), k4 = this.deriv(S4, this.mp);
+    const N = S.map((s, i) => s + dt / 6 * (k1[i] + 2 * k2[i] + 2 * k3[i] + k4[i]));
+    [this.x, this.y, this.vx, this.vy, this.th, this.om, this.prop] = N;
+    this.t += dt;
+    // losses (evaluated with the step-start forces)
+    const a = aux1;
+    if (a.va > 1) {
+      const r = Math.hypot(S[0], S[1]); const vr = (S[2] * S[0] + S[3] * S[1]) / r; const vs = Math.hypot(S[2], S[3]);
+      if (a.T > 0) { this.loss.grav += a.gm * (vr / vs) * dt; this.loss.delivered += a.T / a.m * dt; }
+      if (this.apogeeT === null) this.loss.drag += a.D / a.m * dt;
+    }
+    this.after(dt, k1);
+  }
+
+  after(dt, k1) {
+    const v = this.veh;
+    if (this.prop <= 0 && this.throttle > 0 && !this.burnout) {
+      this.prop = 0; this.burnout = true; this.burnoutT = this.t; this.engine = 'burnout';
+      this.log(v.eng.type === 'solid' ? 'Motor burnout' : 'Propellant depleted, engine cut-off');
+    }
+    if (this.engine === 'shutdown' || this.engine === 'burnout') this.throttle = 0;
+    const d = this.derived(); this.d = d; const a = this._aux;
+    this.sensedG = Math.hypot(a.fxNG, a.fyNG) / a.m / G0;
+    if (!this.clamped) {
+      this.max.alt = Math.max(this.max.alt, d.alt); this.max.speed = Math.max(this.max.speed, d.speed);
+      this.max.g = Math.max(this.max.g, this.sensedG); this.max.mach = Math.max(this.max.mach, d.mach);
+    }
+    if (this.apogeeT === null && d.q > this.max.q) { this.max.q = d.q; this.maxQt = this.t; this.maxQalt = d.alt; }
+    else if (this.apogeeT === null && this.qRising && this.max.q > 3000 && d.q < this.max.q * 0.97) { this.qRising = false; this.events.push({ t: this.maxQt, msg: `Max Q: ${(this.max.q / 1000).toFixed(1)} kPa at ${(this.maxQalt / 1000).toFixed(1)} km`, kind: 'info' }); }
+    if (!this.mach1 && d.mach >= 1) { this.mach1 = true; this.log('Supersonic'); }
+    if (!this.reached && d.alt >= 100000) { this.reached = true; this.log('Payload crossed 100 km. Mission objective complete.', 'good'); }
+    if (!this.clamped && this.apogeeT === null && this.liftoffT !== null && this.t - this.liftoffT > 2 && d.vr < 0) {
+      this.apogeeT = this.t; this.apogee = this.max.alt; this.log(`Apogee: ${(this.max.alt / 1000).toFixed(1)} km`, this.reached ? 'good' : 'bad');
+    }
+    // failure detection
+    if (!this.failure && this.apogeeT === null) {
+      if (d.q > v.qMax) this.fail('overload', `Structural overload: dynamic pressure ${(d.q / 1000).toFixed(0)} kPa exceeded the ${(v.qMax / 1000).toFixed(0)} kPa limit`);
+      else if (d.q * a.sina > LIMITS.qAlpha && d.q > 2000) this.fail('breakup', `Aerodynamic break-up at ${(Math.asin(Math.min(1, a.sina)) / DEG).toFixed(1)}° angle of attack`);
+      else if (!this.clamped && a.sina > 0.7 && d.speed > 30 && d.q > 500) this.fail('tumble', 'Loss of control: the vehicle tumbled')
+      else if (this.sensedG > v.gMax && v.payloads.length) this.fail('gforce', `Payload destroyed at ${this.sensedG.toFixed(1)} g (limit ${v.gMax} g)`);
+      else if (this.clamped && this.engine !== 'off' && (this.t - this.ignT > 4 || this.prop <= 0)) this.fail('twr', 'The vehicle never left the pad');
+    }
+    if (!this.clamped && d.alt <= 0 && this.liftoffT !== null && this.t - this.liftoffT > 1) {
+      this.log(`Impact ${(d.downrange / 1000).toFixed(1)} km downrange`, 'bad'); this.end();
+    }
+    if (this.t >= this.teleNext) { this.teleNext += 0.1; this.record(d); }
+  }
+  fail(kind, msg) { this.failure = { kind, msg, t: this.t, alt: this.d.alt }; this.log(msg, 'bad'); this.end(); }
+  end() { if (!this.done) { this.done = true; this.record(this.d); } }
+  derived() {
+    const r = Math.hypot(this.x, this.y), alt = r - RE, atm = atmosphere(alt);
+    const ax = this.vx + WE * this.y, ay = this.vy - WE * this.x, va = Math.hypot(ax, ay);
+    const vr = (this.vx * this.x + this.vy * this.y) / r;
+    const padAng = Math.PI / 2 + WE * this.t, ang = Math.atan2(this.y, this.x);
+    let dang = padAng - ang; dang = Math.atan2(Math.sin(dang), Math.cos(dang));
+    const m = this.veh.dryMass + this.prop;
+    const e = this.veh.eng; const T = e && this.throttle > 0 && this.prop > 0 ? this.veh.mdotMax * this.throttle * G0 * (e.ispVac - (e.ispVac - e.ispSL) * atm.p / P0) : 0;
+    const q = 0.5 * atm.rho * va * va;
+    return { alt, speed: va, vr, q, mach: va / atm.a, downrange: RE * dang, mass: m, thrust: T, twr: T / (m * MU / (r * r)),
+      pitch: this.pitchOf(this.th, this.x, this.y), velPitch: va > 1 ? this.pitchOf(Math.atan2(ay, ax), this.x, this.y) : 90,
+      apo: this.clamped ? 0 : orbitApo(this.x, this.y, this.vx, this.vy), p: atm.p, rho: atm.rho, fuel: this.veh.propCap ? this.prop / this.veh.propCap : 0 };
+  }
+  record(d) {
+    this.tele.push({ t: this.t, alt: d.alt, speed: d.speed, g: this.sensedG || 0, q: d.q, mass: d.mass, mach: d.mach, thrust: d.thrust, fuel: d.fuel, down: d.downrange });
+  }
+}
+
+// ---------- Flight report / failure analysis ----------
+function flightReport(f, an) {
+  const v = f.veh;
+  const R = { success: f.reached, cause: '', evidence: [], factors: [], fixes: [] };
+  const km = x => (x / 1000).toFixed(1) + ' km';
+  const apo = f.apogee ?? f.max.alt;
+  if (f.reached) {
+    R.cause = f.failure ? `Objective complete. The vehicle was then lost: ${f.failure.msg.toLowerCase()}.` : 'Science payload carried above 100 km.';
+    R.evidence.push(`Peak altitude ${km(f.max.alt)}`, `Margin above target ${km(f.max.alt - 100000)}`);
+    if (an.dvVac > 0) R.evidence.push(`ΔV available ${an.dvVac.toFixed(0)} m/s`);
+    if (f.max.alt > 160000) R.fixes.push('There is a lot of spare performance. Try the heavy payload or a smaller tank.');
+    else R.fixes.push('Try the heavy payload next, or reach 100 km with a lighter vehicle.');
+    return R;
+  }
+  if (f.failure) {
+    const k = f.failure.kind;
+    R.evidence.push(`Failure at T+${(f.failure.t - (f.liftoffT ?? 0)).toFixed(1)} s, altitude ${km(f.failure.alt)}`);
+    if (k === 'twr') {
+      R.cause = 'Insufficient lift-off thrust.';
+      R.evidence.push(`Thrust-to-weight ${an.twr.toFixed(2)}, required above 1.00`, `Lift-off mass ${an.wet.toFixed(0)} kg`);
+      R.fixes.push('Use a stronger engine.', 'Carry less propellant or a lighter payload.');
+    } else if (k === 'overload') {
+      R.cause = 'Structural overload from excessive dynamic pressure.';
+      R.evidence.push(`Dynamic pressure reached ${(f.max.q / 1000).toFixed(0)} kPa`, `Structural limit ${(v.qMax / 1000).toFixed(0)} kPa`, `Speed ${f.d.speed.toFixed(0)} m/s in dense air`);
+      R.factors.push(`Lift-off thrust-to-weight of ${an.twr.toFixed(2)} accelerates the vehicle hard while the air is still thick.`);
+      R.fixes.push(v.eng.type === 'liquid' ? 'Throttle down between about 5 and 15 km, then return to full throttle.' : 'A solid motor cannot throttle. Use a liquid engine or add mass.', 'Use a lower-thrust engine.');
+    } else if (k === 'breakup') {
+      R.cause = 'The vehicle turned sideways into the airflow and broke apart.';
+      R.evidence.push(`Stability margin at lift-off ${an.smFull.toFixed(1)} calibres`, `Dynamic pressure ${(f.d.q / 1000).toFixed(1)} kPa`);
+      if (an.smFull < 0) {
+        R.factors.push('The centre of pressure sits ahead of the centre of gravity, so any small disturbance grows.');
+        if (f.burnoutT != null && f.failure.t - f.burnoutT < 8) R.factors.push('The gimbal held it straight while the engine ran. At burnout the steering disappeared and the airflow turned it sideways.');
+        R.fixes.push('Add fins to move the centre of pressure aft.');
+      }
+      else R.factors.push('Large steering inputs at high dynamic pressure bent the vehicle.');
+      if (!f.sas && v.eng.gimbal > 0) R.fixes.push('Keep attitude hold (SAS) on so the gimbal can correct errors.');
+      R.fixes.push('Avoid pitching while dynamic pressure is high.');
+    } else if (k === 'tumble') {
+      R.cause = 'Loss of control. The vehicle tumbled end over end.';
+      R.evidence.push(`Stability margin at lift-off ${an.smFull.toFixed(1)} calibres`);
+      if (an.smFull < 0) { R.factors.push('The centre of pressure sits ahead of the centre of gravity, so the airflow flips the vehicle around.'); R.fixes.push('Add fins to move the centre of pressure aft.'); }
+      if (!f.sas && v.eng.gimbal > 0) R.fixes.push('Keep attitude hold (SAS) on so the gimbal can correct errors.');
+      if (!R.fixes.length) R.fixes.push('Use larger fins, and avoid sharp pitch inputs.');
+    } else if (k === 'gforce') {
+      R.cause = 'The payload was crushed by acceleration.';
+      R.evidence.push(`Acceleration reached ${f.max.g.toFixed(1)} g`, `Payload limit ${v.gMax} g`);
+      R.factors.push('As propellant burns off, the same thrust pushes a lighter vehicle, so acceleration climbs near burnout.');
+      R.fixes.push(v.eng.type === 'liquid' ? 'Throttle down late in the burn.' : 'Use a liquid engine you can throttle.', 'Use a less powerful engine.');
+    }
+    return R;
+  }
+  if (f.userEnded && f.apogeeT === null) {
+    R.cause = f.liftoffT === null ? 'Flight ended on the pad.' : 'Flight ended before apogee.';
+    if (f.liftoffT !== null) R.evidence.push(`Altitude at the end ${km(f.d.alt)}`, `Predicted apogee ${km(f.d.apo)}`);
+    R.fixes.push('Fly again and let the flight run to apogee. Time warp speeds up the coast.');
+    return R;
+  }
+  // fell short
+  R.cause = 'Insufficient ΔV to reach 100 km.';
+  R.evidence.push(`Apogee ${km(apo)}, target 100 km`, `ΔV available ${an.dvVac.toFixed(0)} m/s`,
+    `Lost to gravity ${f.loss.grav.toFixed(0)} m/s`, `Lost to drag ${f.loss.drag.toFixed(0)} m/s`);
+  const shortBy = 100000 - apo;
+  if (f.loss.grav > 0.45 * f.loss.delivered) R.factors.push(`Low thrust-to-weight (${an.twr.toFixed(2)}) meant a long, slow climb. Gravity took ${(100 * f.loss.grav / Math.max(1, f.loss.delivered)).toFixed(0)}% of the burn.`);
+  if (f.loss.drag > 350) R.factors.push('Drag was high. A pointed nose and fewer fins help.');
+  const pitchLoss = f.tele.some(s => s.down > 5000);
+  if (pitchLoss) R.factors.push(`The vehicle drifted ${km(Math.abs(f.d.downrange))} downrange. Horizontal speed does not help altitude.`);
+  R.fixes.push(shortBy < 25000 ? 'You were close. A bigger tank or a lighter payload should get you there.' : 'Add propellant, or use a more efficient engine.');
+  R.fixes.push('Fly straight up. For a sounding mission every degree of tilt costs altitude.');
+  return R;
+}
+
+</script>
+<script>
+// ================= AEROLAB UI (reads simulation state, never computes physics) =================
+const $ = s => document.querySelector(s);
+const fmt = (x, d = 0) => Number.isFinite(x) ? x.toLocaleString('en-US', { minimumFractionDigits: d, maximumFractionDigits: d }) : '—';
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const CAT = [['nose', 'Nose cones'], ['payload', 'Payload'], ['avionics', 'Avionics'], ['tank', 'Propellant tanks'], ['engine', 'Engines'], ['fins', 'Fins, attached to the tail']];
+const RANK = { nose: 0, payload: 1, avionics: 2, tank: 3, engine: 4 };
+const DV_NEEDED = 2500;
+const store = {
+  get(k, d) { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); return true; } catch (e) { return false; } }
+};
+let design = store.get('aerolab.v01.current', null) || { name: 'Sounder', stack: ['nose_ogive', 'payload_sci', 'avionics', 'tank_m', 'eng_sparrow'], fins: null };
+let selected = null, an = null, bestDone = store.get('aerolab.v01.missionDone', false);
+
+function partStat(d) {
+  switch (d.cat) {
+    case 'tank': return `${d.prop} kg propellant, ${d.mass} kg empty`;
+    case 'engine': return d.type === 'solid' ? `${fmt(d.tvac / 1000, 0)} kN, Isp ${d.ispSL}–${d.ispVac} s, ${d.mass + d.prop} kg loaded`
+      : `${fmt(d.tvac / 1000, 0)} kN, Isp ${d.ispSL}–${d.ispVac} s, ${d.mass} kg`;
+    case 'fins': return `${d.mass} kg, pulls pressure aft`;
+    default: return `${d.mass} kg, ${d.len} m long`;
+  }
+}
+function partMass(d) { return d.mass + (d.prop || 0); }
+
+// ---------- Builder ----------
+function renderPalette() {
+  const el = $('#palette'); el.innerHTML = '';
+  for (const [cat, label] of CAT) {
+    const g = document.createElement('div'); g.className = 'group';
+    g.innerHTML = `<h3>${label}</h3>`;
+    for (const [id, d] of Object.entries(PARTS)) if (d.cat === cat) {
+      const b = document.createElement('button'); b.className = 'pbtn';
+      b.innerHTML = `<strong>${d.name}</strong><small>${partStat(d)}</small>`;
+      b.title = d.note; b.onclick = () => addPart(id); g.appendChild(b);
+    }
+    el.appendChild(g);
+  }
+}
+function addPart(id) {
+  const d = PARTS[id];
+  if (d.cat === 'fins') { design.fins = id; selected = 'fins'; return update(); }
+  if (design.stack.length >= 8 && !(d.cat === 'nose' || d.cat === 'engine')) return flash('The stack is limited to 8 parts in V0.1.');
+  const st = design.stack;
+  if (d.cat === 'nose') { const i = st.findIndex(p => PARTS[p].cat === 'nose'); if (i >= 0) st.splice(i, 1); st.unshift(id); selected = 0; return update(); }
+  if (d.cat === 'engine') { const i = st.findIndex(p => PARTS[p].cat === 'engine'); if (i >= 0) st.splice(i, 1); st.push(id); selected = st.length - 1; return update(); }
+  let at = 0; st.forEach((p, i) => { if (RANK[PARTS[p].cat] <= RANK[d.cat]) at = i + 1; });
+  st.splice(at, 0, id); selected = at; update();
+}
+function renderStack() {
+  const ul = $('#stack'); ul.innerHTML = '';
+  if (!design.stack.length) ul.innerHTML = '<li class="empty">Add parts from the list. They stack top to bottom.</li>';
+  design.stack.forEach((id, i) => {
+    const d = PARTS[id], li = document.createElement('li'); if (selected === i) li.className = 'sel';
+    li.innerHTML = `<span class="nm">${d.name}</span><span class="kg">${fmt(partMass(d))} kg</span>
+      <button class="ib" aria-label="Move ${d.name} up" ${i === 0 ? 'disabled' : ''}>▲</button>
+      <button class="ib" aria-label="Move ${d.name} down" ${i === design.stack.length - 1 ? 'disabled' : ''}>▼</button>
+      <button class="ib" aria-label="Remove ${d.name}">✕</button>`;
+    const [up, dn, rm] = li.querySelectorAll('button');
+    li.querySelector('.nm').onclick = () => { selected = i; update(); };
+    up.onclick = () => { [design.stack[i - 1], design.stack[i]] = [design.stack[i], design.stack[i - 1]]; selected = i - 1; update(); };
+    dn.onclick = () => { [design.stack[i + 1], design.stack[i]] = [design.stack[i], design.stack[i + 1]]; selected = i + 1; update(); };
+    rm.onclick = () => { design.stack.splice(i, 1); selected = null; update(); };
+    ul.appendChild(li);
+  });
+  const fr = $('#finsRow');
+  if (design.fins) {
+    const d = PARTS[design.fins];
+    fr.innerHTML = `<ul class="stack"><li class="${selected === 'fins' ? 'sel' : ''}"><span class="nm">${d.name}, on the tail</span><span class="kg">${d.mass} kg</span><button class="ib" aria-label="Remove fins">✕</button></li></ul>`;
+    fr.querySelector('.nm').onclick = () => { selected = 'fins'; update(); };
+    fr.querySelector('button').onclick = () => { design.fins = null; selected = null; update(); };
+  } else fr.innerHTML = '<div class="muted" style="font-size:13.5px">No fins attached.</div>';
+}
+function status(v, rules) { for (const [test, cls, txt] of rules) if (test(v)) return [cls, txt]; return ['', '']; }
+function renderAnalysis() {
+  an = analyze(design);
+  const e = an.veh.eng, row = (k, v, cls = '', sub = '') => `<tr><td>${k}</td><td class="${cls}">${v}</td></tr>` + (sub ? `<tr class="sub"><td colspan="2" style="text-align:left">${sub}</td></tr>` : '');
+  const [tc, tt] = status(an.twr, [[x => x < 1, 'st-bad', 'Will not leave the pad'], [x => x < 1.5, 'st-caution', 'Slow climb, large gravity losses'],
+    [x => x <= 3.5, 'st-good', 'Healthy'], [x => true, 'st-caution', 'Fast in thick air. Watch dynamic pressure.']]);
+  const [sc, stx] = status(an.smFull, [[x => x < 0, 'st-bad', 'Unstable: pressure acts ahead of gravity'], [x => x < 1, 'st-caution', 'Marginal'],
+    [x => x <= 3, 'st-good', 'Stable'], [x => true, 'st-caution', 'Overstable: turns hard into any wind']]);
+  const dvPct = Math.min(100, an.dvVac / 4000 * 100), need = DV_NEEDED / 4000 * 100;
+  const dvCls = an.dvVac >= DV_NEEDED ? 'st-good' : an.dvVac >= DV_NEEDED * 0.85 ? 'st-caution' : 'st-bad';
+  $('#engTable').innerHTML =
+    row('Lift-off mass', `${fmt(an.wet)} kg`) + row('Empty mass', `${fmt(an.dry)} kg`) + row('Usable propellant', `${fmt(an.prop)} kg`) +
+    (e ? row('Thrust, sea level / vacuum', `${fmt(an.thrustSL / 1000, 1)} / ${fmt(an.thrustVac / 1000, 1)} kN`) : '') +
+    row('Thrust-to-weight at lift-off', e ? fmt(an.twr, 2) : '—', tc, tt) +
+    `<tr><td colspan="2" style="border-bottom:0;padding-bottom:0;text-align:left;font-weight:400">ΔV, vacuum <span style="float:right;font-weight:600" class="${dvCls}">${fmt(an.dvVac)} m/s</span>
+      <div class="dvbar"><div style="width:${dvPct}%"></div><span style="left:${need}%"></span></div></td></tr>
+      <tr class="sub"><td colspan="2" style="text-align:left">The mark shows roughly ${fmt(DV_NEEDED)} m/s, what a vertical flight to 100 km needs once gravity and drag take their share.</td></tr>` +
+    row('Burn time', an.burn ? `${fmt(an.burn, 0)} s` : '—') + row('Length', `${fmt(an.L, 1)} m`) +
+    row('Centre of gravity, full / empty', `${fmt(an.cgFull, 2)} / ${fmt(an.cgEmpty, 2)} m`, '', 'Measured from the nose tip.') +
+    row('Centre of pressure', `${fmt(an.cp, 2)} m`) +
+    row('Stability margin', `${fmt(an.smFull, 1)} cal`, sc, stx + '. One calibre is one body diameter, 0.6 m.') +
+    row('Structural limit', `${fmt(an.veh.qMax / 1000)} kPa`, '', 'Maximum dynamic pressure the airframe survives.') +
+    (an.veh.payloads.length ? row('Payload acceleration limit', `${an.veh.gMax} g`) : '');
+  const ul = $('#issues'); ul.innerHTML = '';
+  if (!an.issues.length) ul.innerHTML = '<li class="ok" style="border-left-color:var(--good)">No problems found. Ready for the pad.</li>';
+  for (const i of an.issues) {
+    const li = document.createElement('li'); li.className = i.level;
+    li.innerHTML = `<div>${i.text}${i.part ? ` <span class="muted">(${i.part})</span>` : ''}</div><div class="fix">${i.fix}</div>`;
+    ul.appendChild(li);
+  }
+  const errs = an.issues.filter(i => i.level === 'error').length;
+  $('#launchBtn').disabled = !an.valid;
+  $('#launchMsg').textContent = an.valid ? '' : `Fix ${errs} problem${errs > 1 ? 's' : ''} to launch`;
+  $('#models').innerHTML = `Physics ${MODEL.physics}<br>Atmosphere ${MODEL.atmosphere}<br>Gravity ${MODEL.gravity}<br>Integrator ${MODEL.integrator}`;
+}
+function renderInspector() {
+  const el = $('#inspector');
+  let d = null;
+  if (selected === 'fins' && design.fins) d = PARTS[design.fins];
+  else if (typeof selected === 'number' && design.stack[selected]) d = PARTS[design.stack[selected]];
+  el.innerHTML = d ? `<b>${d.name}</b><div>${d.note}</div><div class="muted">${partStat(d)}</div>`
+    : `<span class="muted">Select a part in the drawing or the stack to inspect it.</span>`;
+}
+function update() {
+  design.name = $('#dname').value.trim() || 'Sounder';
+  store.set('aerolab.v01.current', design);
+  renderStack(); renderAnalysis(); renderInspector(); drawBuilder();
+}
+function flash(msg) { $('#barMsg').textContent = msg; clearTimeout(flash.t); flash.t = setTimeout(() => $('#barMsg').textContent = '', 3000); }
+
+// ---------- Save / load (versioned, never overwrites) ----------
+function refreshLoad() {
+  const list = store.get('aerolab.v01.designs', []), sel = $('#loadSel');
+  sel.innerHTML = '<option value="">Load design</option>' + list.map((d, i) => `<option value="${i}">${d.label}</option>`).reverse().join('');
+}
+$('#saveBtn').onclick = () => {
+  const list = store.get('aerolab.v01.designs', []), name = (design.name || 'Sounder').replace(/[^\w\- ]/g, '');
+  const n = list.filter(d => d.name === name).length + 1;
+  const label = `${name}_v${String(n).padStart(3, '0')}`;
+  list.push({ name, label, stack: [...design.stack], fins: design.fins, savedAt: Date.now() });
+  if (store.set('aerolab.v01.designs', list)) { flash(`Saved ${label}`); refreshLoad(); } else flash('This browser blocked saving.');
+};
+$('#loadSel').onchange = e => {
+  const list = store.get('aerolab.v01.designs', []), d = list[+e.target.value]; if (!d) return;
+  design = { name: d.name, stack: [...d.stack], fins: d.fins }; $('#dname').value = d.name; selected = null; update(); flash(`Loaded ${d.label}`); e.target.value = '';
+};
+$('#dname').oninput = () => update();
+
+// ---------- Rocket drawing (shared by builder and flight) ----------
+const PAINT = { body: '#E3E8EE', shade: '#B6BFCB', line: '#27303E', metal: '#6A7280', metalDark: '#3B424D', accent: '#F2A541', fin: '#3C4A5E', window: '#2C4A70', tank: '#D3DAE3' };
+function drawRocket(ctx, veh, sc, opt = {}) {
+  const r = DIAM / 2 * sc, lw = Math.max(1, Math.min(2, sc * 0.02));
+  ctx.lineWidth = lw; ctx.lineJoin = 'round'; ctx.strokeStyle = PAINT.line;
+  const shadeFill = (x0, w) => { const g = ctx.createLinearGradient(-r, 0, r, 0); g.addColorStop(0, PAINT.shade); g.addColorStop(0.35, PAINT.body); g.addColorStop(1, PAINT.shade); return g; };
+  if (veh.fins) {
+    const span = (veh.design.fins === 'fins_l' ? 0.55 : 0.36) * sc, y0 = (veh.sFin - 0.4) * sc, y1 = (veh.sFin + 0.4) * sc;
+    ctx.fillStyle = PAINT.fin;
+    for (const s of [-1, 1]) { ctx.beginPath(); ctx.moveTo(s * r, y0); ctx.lineTo(s * (r + span), y0 + 0.5 * (y1 - y0)); ctx.lineTo(s * (r + span), y1 + 0.06 * sc); ctx.lineTo(s * r, y1); ctx.closePath(); ctx.fill(); ctx.stroke(); }
+  }
+  veh.items.forEach((it, idx) => {
+    const d = it.def, h = d.len * sc; ctx.save(); ctx.translate(0, it.sTop * sc);
+    ctx.fillStyle = shadeFill();
+    if (d.cat === 'nose') {
+      ctx.beginPath(); ctx.moveTo(-r, h);
+      if (d.cpFrac < 0.5) { ctx.quadraticCurveTo(-r, h * 0.3, 0, 0); ctx.quadraticCurveTo(r, h * 0.3, r, h); }
+      else { ctx.lineTo(0, 0); ctx.lineTo(r, h); }
+      ctx.closePath(); ctx.fill(); ctx.stroke();
+    } else if (d.cat === 'engine' && d.type === 'liquid') {
+      const ts = Math.min(0.35 * sc, h * 0.3);
+      ctx.fillStyle = PAINT.metalDark; ctx.beginPath(); ctx.moveTo(-r, 0); ctx.lineTo(r, 0); ctx.lineTo(r * 0.45, ts); ctx.lineTo(-r * 0.45, ts); ctx.closePath(); ctx.fill(); ctx.stroke();
+      const g = ctx.createLinearGradient(-r, 0, r, 0); g.addColorStop(0, '#3E4550'); g.addColorStop(0.4, '#8C95A3'); g.addColorStop(1, '#3E4550');
+      ctx.fillStyle = g; const tw = r * 0.28, ew = r * 0.85;
+      ctx.beginPath(); ctx.moveTo(-tw, ts); ctx.lineTo(tw, ts); ctx.quadraticCurveTo(tw * 1.1, ts + (h - ts) * 0.55, ew, h); ctx.lineTo(-ew, h); ctx.quadraticCurveTo(-tw * 1.1, ts + (h - ts) * 0.55, -tw, ts); ctx.closePath(); ctx.fill(); ctx.stroke();
+    } else if (d.cat === 'engine') {
+      const nz = Math.min(0.5 * sc, h * 0.2), body = h - nz;
+      ctx.fillRect(-r, 0, 2 * r, body); ctx.strokeRect(-r, 0, 2 * r, body);
+      ctx.fillStyle = PAINT.accent; ctx.fillRect(-r, body * 0.08, 2 * r, Math.max(2, 0.12 * sc)); ctx.strokeRect(-r, body * 0.08, 2 * r, Math.max(2, 0.12 * sc));
+      ctx.fillStyle = PAINT.metalDark; ctx.beginPath(); ctx.moveTo(-r * 0.4, body); ctx.lineTo(r * 0.4, body); ctx.lineTo(r * 0.7, h); ctx.lineTo(-r * 0.7, h); ctx.closePath(); ctx.fill(); ctx.stroke();
+    } else {
+      ctx.fillRect(-r, 0, 2 * r, h); ctx.strokeRect(-r, 0, 2 * r, h);
+      if (d.cat === 'tank') { ctx.globalAlpha = 0.5; for (const y of [0.1 * sc, h - 0.1 * sc]) { ctx.beginPath(); ctx.moveTo(-r, y); ctx.lineTo(r, y); ctx.stroke(); } ctx.globalAlpha = 1; }
+      if (d.cat === 'payload') { ctx.fillStyle = PAINT.accent; ctx.fillRect(-r, h * 0.72, 2 * r, h * 0.12); ctx.fillStyle = PAINT.window; ctx.beginPath(); ctx.arc(0, h * 0.38, Math.min(r * 0.3, h * 0.2), 0, 7); ctx.fill(); }
+      if (d.cat === 'avionics') { ctx.fillStyle = PAINT.metalDark; const n = 4; for (let k = 0; k < n; k++) ctx.fillRect(-r + (k + 0.5) * (2 * r / n) - r * 0.08, h * 0.3, r * 0.16, h * 0.4); }
+    }
+    if (opt.highlight === idx) { ctx.strokeStyle = opt.hl; ctx.setLineDash([5, 4]); ctx.lineWidth = 2; ctx.strokeRect(-r - 6, -3, 2 * r + 12, h + 6); ctx.setLineDash([]); ctx.strokeStyle = PAINT.line; ctx.lineWidth = lw; }
+    ctx.restore();
+  });
+  if (opt.highlight === 'fins' && veh.fins) { const span = (veh.design.fins === 'fins_l' ? 0.55 : 0.36) * sc; ctx.strokeStyle = opt.hl; ctx.setLineDash([5, 4]); ctx.lineWidth = 2; ctx.strokeRect(-r - span - 6, (veh.sFin - 0.45) * sc, 2 * (r + span) + 12, 0.95 * sc); ctx.setLineDash([]); }
+}
+function cgMarker(ctx, x, y, R, col, hollow) {
+  ctx.lineWidth = 1.5; ctx.strokeStyle = col; ctx.fillStyle = col;
+  ctx.beginPath(); ctx.arc(x, y, R, 0, 7); ctx.stroke();
+  if (!hollow) { ctx.beginPath(); ctx.moveTo(x, y); ctx.arc(x, y, R, -Math.PI / 2, 0); ctx.closePath(); ctx.fill(); ctx.beginPath(); ctx.moveTo(x, y); ctx.arc(x, y, R, Math.PI / 2, Math.PI); ctx.closePath(); ctx.fill(); }
+}
+let bGeom = null;
+function drawBuilder() {
+  const cv = $('#bcv'), dpr = window.devicePixelRatio || 1, W = cv.clientWidth, H = cv.clientHeight;
+  if (!W || !H) return;
+  cv.width = W * dpr; cv.height = H * dpr; const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+  const text = css('--text'), muted = css('--muted'), line = css('--line'), data = css('--data'), acc = css('--accent');
+  // grid, like a drawing sheet
+  ctx.strokeStyle = line; ctx.globalAlpha = 0.35; ctx.lineWidth = 1;
+  for (let x = (W / 2) % 40; x < W; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke(); }
+  for (let y = 0; y < H; y += 40) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke(); }
+  ctx.globalAlpha = 1;
+  const veh = an.veh; if (!veh.items.length) { ctx.fillStyle = muted; ctx.font = '15px ' + css('--font'); ctx.textAlign = 'center'; ctx.fillText('Your vehicle appears here', W / 2, H / 2); bGeom = null; return; }
+  const sc = Math.min((H - 70) / veh.L, W * 0.16 / DIAM, 120), top = (H - veh.L * sc) / 2, cx = W / 2;
+  bGeom = { sc, top, cx };
+  ctx.save(); ctx.translate(cx, top); drawRocket(ctx, veh, sc, { highlight: selected, hl: acc }); ctx.restore();
+  const r = DIAM / 2 * sc, markX = cx + r + 58;
+  // centreline
+  ctx.strokeStyle = muted; ctx.setLineDash([8, 4, 2, 4]); ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(cx, top - 16); ctx.lineTo(cx, top + veh.L * sc + 16); ctx.stroke(); ctx.setLineDash([]);
+  // CG / CP markers
+  const f = css('--font'); ctx.font = `13px ${f}`; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  const yCg = top + an.cgFull * sc, yCgE = top + an.cgEmpty * sc, yCp = top + an.cp * sc;
+  ctx.strokeStyle = data; ctx.globalAlpha = 0.6; ctx.beginPath(); ctx.moveTo(cx, yCg); ctx.lineTo(markX - 9, yCg); ctx.stroke(); ctx.globalAlpha = 1;
+  cgMarker(ctx, markX, yCg, 8, data, false); cgMarker(ctx, markX, yCgE, 5, data, true);
+  ctx.fillStyle = data; ctx.fillText(`CG ${fmt(an.cgFull, 2)} m`, markX + 14, yCg);
+  ctx.strokeStyle = acc; ctx.fillStyle = acc; ctx.beginPath(); ctx.arc(markX, yCp, 8, 0, 7); ctx.stroke(); ctx.beginPath(); ctx.arc(markX, yCp, 2.5, 0, 7); ctx.fill();
+  ctx.globalAlpha = 0.6; ctx.beginPath(); ctx.moveTo(cx, yCp); ctx.lineTo(markX - 9, yCp); ctx.stroke(); ctx.globalAlpha = 1;
+  ctx.fillText(`CP ${fmt(an.cp, 2)} m`, markX + 14, yCp + (Math.abs(yCp - yCg) < 16 ? 16 : 0));
+  // length dimension on the left
+  const dx = cx - r - 60; ctx.strokeStyle = muted; ctx.fillStyle = muted; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(dx, top); ctx.lineTo(dx, top + veh.L * sc); ctx.stroke();
+  for (const y of [top, top + veh.L * sc]) { ctx.beginPath(); ctx.moveTo(dx - 6, y); ctx.lineTo(dx + 6, y); ctx.stroke(); }
+  ctx.save(); ctx.translate(dx - 10, top + veh.L * sc / 2); ctx.rotate(-Math.PI / 2); ctx.textAlign = 'center'; ctx.fillText(`${fmt(veh.L, 1)} m`, 0, 0); ctx.restore();
+}
+$('#bcv').addEventListener('click', e => {
+  if (!bGeom) return; const rc = e.target.getBoundingClientRect(), x = e.clientX - rc.left, y = e.clientY - rc.top;
+  const s = (y - bGeom.top) / bGeom.sc, lat = Math.abs(x - bGeom.cx) / bGeom.sc;
+  if (an.veh.fins && lat > DIAM / 2 && lat < DIAM / 2 + 0.6 && Math.abs(s - an.veh.sFin) < 0.5) { selected = 'fins'; return update(); }
+  if (lat > DIAM / 2 + 0.1) { selected = null; return update(); }
+  const i = an.veh.items.findIndex(it => s >= it.sTop && s < it.sBot); selected = i >= 0 ? i : null; update();
+});
+window.addEventListener('resize', () => { if (!$('#builder').classList.contains('hidden')) drawBuilder(); else resizeFlight(); });
+matchMedia('(prefers-color-scheme: dark)').addEventListener?.('change', () => drawBuilder());
+
+// ---------- Flight ----------
+let F = null, fAn = null, warp = 1, keys = {}, lastFrame = 0, accum = 0, hudTick = 0, logCount = 0, particles = [], stars = [], boom = null, reportShown = false, running = false;
+const WARPS = [1, 2, 5, 10, 25];
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+function buildWarp() {
+  $('#warp').innerHTML = WARPS.map(w => `<button class="btn ${w === warp ? 'on' : ''}" data-w="${w}">${w}×</button>`).join('');
+  $('#warp').querySelectorAll('button').forEach(b => b.onclick = () => setWarp(+b.dataset.w));
+}
+function setWarp(w) { warp = w; buildWarp(); }
+function startFlight() {
+  F = new Flight(design); fAn = analyze(design); warp = 1; accum = 0; logCount = 0; boom = null; reportShown = false;
+  $('#log').innerHTML = ''; $('#banner').classList.add('hidden'); $('#modal').classList.add('hidden');
+  $('#builder').classList.add('hidden'); $('#bbar').classList.add('hidden'); document.querySelector('.top').classList.add('hidden');
+  $('#flight').classList.remove('hidden');
+  const liquid = F.veh.eng.type === 'liquid';
+  $('#thrCtl').style.display = liquid ? '' : 'none'; $('#thr').value = 100; $('#thrVal').textContent = '100%';
+  $('#sasBtn').style.display = liquid ? '' : 'none'; $('#pl').style.display = liquid ? '' : 'none'; $('#pr').style.display = liquid ? '' : 'none';
+  $('#igniteBtn').classList.remove('hidden'); $('#cutBtn').classList.add('hidden');
+  syncSas(); buildWarp();
+  stars = Array.from({ length: 160 }, () => ({ x: Math.random(), y: Math.random(), s: Math.random() * 1.4 + 0.3 }));
+  particles = Array.from({ length: 70 }, () => ({ x: Math.random(), y: Math.random(), l: Math.random() }));
+  showBanner('On the pad', liquid ? 'Press Space or Ignite. Hold attitude keeps you pointed straight up.' : 'Press Space or Ignite. A solid motor burns to the end once lit.');
+  resizeFlight(); running = true; lastFrame = performance.now(); requestAnimationFrame(loop);
+}
+function showBanner(h, p, btn) {
+  const b = $('#banner'); b.innerHTML = `<h2>${h}</h2><div>${p}</div>` + (btn ? `<div style="margin-top:10px"><button class="btn primary" id="bannerBtn">${btn}</button></div>` : '');
+  b.classList.remove('hidden'); if (btn) $('#bannerBtn').onclick = openReport;
+}
+function syncSas() { const b = $('#sasBtn'); b.textContent = F.sas ? 'Hold attitude on' : 'Hold attitude off'; b.classList.toggle('on', F.sas); }
+function resizeFlight() {
+  const cv = $('#fcv'), dpr = Math.min(2, window.devicePixelRatio || 1);
+  cv.width = cv.clientWidth * dpr; cv.height = cv.clientHeight * dpr;
+}
+function ignite() { if (!F || F.engine !== 'off') return; F.ignite(); $('#banner').classList.add('hidden'); $('#igniteBtn').classList.add('hidden'); if (F.veh.eng.type === 'liquid') $('#cutBtn').classList.remove('hidden'); }
+$('#igniteBtn').onclick = ignite;
+$('#cutBtn').onclick = () => { if (F.shutdown()) $('#cutBtn').classList.add('hidden'); };
+$('#thr').oninput = e => { F.setThrottle(e.target.value / 100); $('#thrVal').textContent = e.target.value + '%'; };
+$('#sasBtn').onclick = () => { F.sas = !F.sas; if (F.sas) F.targetPitch = Math.max(0, Math.min(90, F.d.pitch)); syncSas(); };
+$('#endBtn').onclick = () => { if (F && !F.done) { F.userEnded = true; F.end(); } openReport(); };
+const hold = (el, v) => {
+  const on = e => { e.preventDefault(); F && (F.pitchInput = v); }, off = () => { F && (F.pitchInput = 0); };
+  el.addEventListener('pointerdown', on); ['pointerup', 'pointerleave', 'pointercancel'].forEach(t => el.addEventListener(t, off));
+};
+hold($('#pl'), -1); hold($('#pr'), 1);
+window.addEventListener('keydown', e => {
+  if ($('#flight').classList.contains('hidden') || !F) return;
+  if (!$('#modal').classList.contains('hidden')) return;
+  const k = e.key.toLowerCase();
+  if (k === ' ') { e.preventDefault(); ignite(); }
+  else if (k === 'w' || k === 's') { const t = $('#thr'); t.value = +t.value + (k === 'w' ? 5 : -5); t.oninput({ target: t }); }
+  else if (k === 'a' || k === 'arrowleft') { F.pitchInput = -1; }
+  else if (k === 'd' || k === 'arrowright') { F.pitchInput = 1; }
+  else if (k === 't') $('#sasBtn').click();
+  else if (k === 'x') $('#cutBtn').click();
+  else if (k === '.' || k === ',') { const i = WARPS.indexOf(warp) + (k === '.' ? 1 : -1); setWarp(WARPS[Math.max(0, Math.min(WARPS.length - 1, i))]); }
+  else if (k === 'escape') $('#endBtn').click();
+});
+window.addEventListener('keyup', e => { const k = e.key.toLowerCase(); if (F && ['a', 'd', 'arrowleft', 'arrowright'].includes(k)) F.pitchInput = 0; });
+
+function loop(now) {
+  if (!running) return;
+  const real = Math.min(0.1, (now - lastFrame) / 1000); lastFrame = now;
+  if (!F.done) {
+    accum += real * warp; let n = 0;
+    while (accum >= 0.01 && n < 4000 && !F.done) { F.step(0.01); accum -= 0.01; n++; }
+    if (F.done) { accum = 0; if (F.failure) boom = { t: now }; setWarp(1); }
+  }
+  renderFlight(real, now);
+  if (++hudTick % 3 === 0) renderHud();
+  if (F.done && !reportShown && (!boom || now - boom.t > 1600)) { reportShown = true; setTimeout(openReport, 250); }
+  requestAnimationFrame(loop);
+}
+
+function mix(a, b, t) { const pa = parseInt(a.slice(1), 16), pb = parseInt(b.slice(1), 16); const c = i => Math.round(((pa >> i) & 255) * (1 - t) + ((pb >> i) & 255) * t); return `rgb(${c(16)},${c(8)},${c(0)})`; }
+function renderFlight(real, now) {
+  const cv = $('#fcv'), ctx = cv.getContext('2d'), dpr = cv.width / cv.clientWidth, W = cv.clientWidth, H = cv.clientHeight;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const d = F.d, alt = Math.max(0, d.alt), veh = F.veh, mp = F.mp || massProps(veh, F.prop);
+  // sky darkens as the air thins
+  const t = Math.min(1, Math.pow(Math.max(0, alt) / 70000, 0.6));
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, mix('#3F7EC4', '#000004', t)); g.addColorStop(1, mix('#A9D0EE', '#070B18', Math.min(1, t * 1.1)));
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  const sa = Math.min(1, Math.max(0, (alt - 25000) / 30000));
+  if (sa > 0) { ctx.fillStyle = '#fff'; for (const s of stars) { ctx.globalAlpha = sa * (0.4 + 0.6 * s.s / 1.7); ctx.fillRect(s.x * W, s.y * H, s.s, s.s); } ctx.globalAlpha = 1; }
+  // planet limb at altitude
+  const la = Math.min(1, Math.max(0, (alt - 6000) / 12000));
+  if (la > 0) {
+    const k = Math.min(1, alt / 200000), R = W * (6 - 4.8 * k), topY = H * (0.8 + 0.12 * k), cy = topY + R;
+    ctx.globalAlpha = la;
+    const glow = ctx.createRadialGradient(W / 2, cy, R, W / 2, cy, R + 40);
+    glow.addColorStop(0, 'rgba(120,180,255,.55)'); glow.addColorStop(1, 'rgba(120,180,255,0)');
+    ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(W / 2, cy, R + 40, 0, 7); ctx.fill();
+    const pg = ctx.createLinearGradient(0, topY, 0, H); pg.addColorStop(0, '#2F6FA8'); pg.addColorStop(0.3, '#1D4C7C'); pg.addColorStop(1, '#10304F');
+    ctx.fillStyle = pg; ctx.beginPath(); ctx.arc(W / 2, cy, R, 0, 7); ctx.fill(); ctx.globalAlpha = 1;
+  }
+  const L = veh.L, sc = Math.min(H * 0.3, 210) / L, cx = W / 2, cy = H * 0.52;
+  let shx = 0, shy = 0;
+  if (!reduceMotion && !F.done && F.throttle > 0) { const s = Math.min(3, d.q / 20000 + (F.clamped ? 1.5 : 0)); shx = (Math.random() - 0.5) * s; shy = (Math.random() - 0.5) * s; }
+  // ground and pad
+  const groundY = cy + (alt * sc) + (L - mp.cg) * sc;
+  if (groundY < H + 20) {
+    const padX = cx - d.downrange * sc + shx;
+    ctx.fillStyle = '#56684F'; ctx.fillRect(0, groundY, W, H - groundY + 10);
+    ctx.fillStyle = '#8B8F93'; ctx.fillRect(padX - DIAM * sc * 3, groundY - 4, DIAM * sc * 6, 6);
+    ctx.strokeStyle = '#B04A2F'; ctx.lineWidth = 2; const tx = padX - DIAM * sc * 1.6, th = L * sc * 1.1;
+    ctx.strokeRect(tx - 10, groundY - th, 10, th);
+    for (let y = groundY - th; y < groundY; y += 14) { ctx.beginPath(); ctx.moveTo(tx - 10, y); ctx.lineTo(tx, y + 14); ctx.stroke(); }
+  }
+  // airflow streaks: they show how dense the air is and where it is coming from
+  const dens = Math.min(1, Math.sqrt(d.rho / 1.225)), vp = d.velPitch * DEG;
+  if (dens > 0.02 && d.speed > 5 && !F.clamped) {
+    const spd = Math.min(d.speed * sc, 2200) * real, dxp = -Math.cos(vp), dyp = Math.sin(vp), len = Math.min(120, 6 + d.speed * 0.08);
+    ctx.strokeStyle = `rgba(255,255,255,${0.35 * dens * Math.min(1, d.speed / 200)})`; ctx.lineWidth = 1;
+    for (const p of particles) {
+      p.x += dxp * spd / W; p.y += dyp * spd / H; p.x = (p.x % 1 + 1) % 1; p.y = (p.y % 1 + 1) % 1;
+      const x = p.x * W, y = p.y * H; ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - dxp * len * (0.5 + p.l), y - dyp * len * (0.5 + p.l)); ctx.stroke();
+    }
+  }
+  // vehicle, rotated from local vertical
+  if (!boom) {
+    ctx.save(); ctx.translate(cx + shx, cy + shy); ctx.rotate((90 - d.pitch) * DEG); ctx.translate(0, -mp.cg * sc);
+    if (F.throttle > 0 && F.prop > 0) drawPlume(ctx, veh, sc, d);
+    drawRocket(ctx, veh, sc);
+    ctx.restore();
+    // velocity marker
+    if (d.speed > 20 && !F.clamped) {
+      const R = L * sc * 0.72, x = cx + Math.cos(vp) * R, y = cy - Math.sin(vp) * R;
+      ctx.strokeStyle = '#8FE0BE'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, y, 7, 0, 7); ctx.stroke();
+      for (const a of [0, Math.PI / 2, Math.PI]) { ctx.beginPath(); ctx.moveTo(x + Math.cos(a - vp) * 7, y + Math.sin(a - vp) * 7); ctx.lineTo(x + Math.cos(a - vp) * 13, y + Math.sin(a - vp) * 13); ctx.stroke(); }
+    }
+  } else {
+    const k = Math.min(1, (now - boom.t) / 1400);
+    const gr = ctx.createRadialGradient(cx, cy, 0, cx, cy, 40 + 160 * k);
+    gr.addColorStop(0, `rgba(255,240,200,${1 - k})`); gr.addColorStop(0.4, `rgba(255,140,40,${0.8 * (1 - k)})`); gr.addColorStop(1, 'rgba(80,40,20,0)');
+    ctx.fillStyle = gr; ctx.beginPath(); ctx.arc(cx, cy, 40 + 160 * k, 0, 7); ctx.fill();
+    ctx.fillStyle = '#3B424D'; for (let i = 0; i < 9; i++) { const a = i * 0.7 + 0.3, r = 20 + 180 * k * (0.5 + (i % 3) / 3); ctx.fillRect(cx + Math.cos(a) * r, cy + Math.sin(a) * r + 60 * k * k, 6, 4); }
+  }
+}
+function drawPlume(ctx, veh, sc, d) {
+  const solid = veh.eng.type === 'solid', r = DIAM / 2 * sc, exp = 1 + 2.2 * (1 - Math.min(1, d.p / P0));
+  const len = veh.L * sc * (0.45 + 0.55 * F.throttle) * (0.9 + 0.2 * Math.random()) * (0.8 + 0.5 * (exp - 1) / 2.2);
+  const w0 = r * 0.8, w1 = r * (solid ? 1.2 : 0.9) * exp, y0 = veh.L * sc;
+  const g = ctx.createLinearGradient(0, y0, 0, y0 + len);
+  if (solid) { g.addColorStop(0, 'rgba(255,250,235,1)'); g.addColorStop(0.25, 'rgba(255,200,110,.95)'); g.addColorStop(1, 'rgba(255,120,40,0)'); }
+  else { g.addColorStop(0, 'rgba(255,245,220,1)'); g.addColorStop(0.2, 'rgba(255,178,80,.9)'); g.addColorStop(1, 'rgba(255,90,30,0)'); }
+  ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(-w0, y0); ctx.quadraticCurveTo(-w1 * 1.1, y0 + len * 0.4, 0, y0 + len); ctx.quadraticCurveTo(w1 * 1.1, y0 + len * 0.4, w0, y0); ctx.closePath(); ctx.fill();
+  if (d.p > 20000 && F.clamped === false && d.alt < 8000 && solid) {
+    ctx.fillStyle = 'rgba(230,230,230,.25)'; for (let i = 0; i < 5; i++) { ctx.beginPath(); ctx.arc((Math.random() - 0.5) * r * 2, y0 + len + i * r * 1.2, r * (1 + i * 0.5), 0, 7); ctx.fill(); }
+  }
+}
+function renderHud() {
+  const d = F.d, tp = F.liftoffT === null ? (F.engine === 'off' ? 0 : F.t - F.ignT) : F.t - F.liftoffT;
+  const mm = Math.floor(Math.abs(tp) / 60), ss = Math.floor(Math.abs(tp) % 60);
+  $('#tplus').textContent = `${F.liftoffT === null ? 'T–' : 'T+'} ${String(mm).padStart(2, '0')}:${String(ss).padStart(2, '0')}${warp > 1 ? `   ${warp}× time` : ''}`;
+  $('#hAlt').innerHTML = `${fmt(Math.max(0, d.alt) / 1000, 2)}<small>km</small>`;
+  const aoa = Math.asin(Math.min(1, F._aux ? F._aux.sina : 0)) / DEG;
+  const qPct = Math.min(100, d.q / F.veh.qMax * 100), qCol = qPct > 80 ? '#EE6A55' : qPct > 55 ? '#E9C46A' : '#6CC4A1';
+  const apo = d.apo === Infinity ? 'escape' : `${fmt(Math.max(0, d.apo) / 1000, 1)} km`;
+  const rows = [
+    ['Velocity', `${fmt(d.speed)} m/s`], ['Vertical speed', `${fmt(d.vr)} m/s`], ['Acceleration', `${fmt(F.sensedG || 0, 1)} g`],
+    ['Mach', fmt(d.mach, 2)], ['Dynamic pressure', `${fmt(d.q / 1000, 1)} kPa`], ['meter', qPct, qCol],
+    ['Angle of attack', d.speed > 20 ? fmt(aoa, 1) + '°' : '—'],
+    ['Pitch', `${fmt(d.pitch, 1)}°`], ...(F.sas && F.veh.eng.gimbal > 0 ? [['Holding pitch', `${fmt(F.targetPitch, 0)}°`]] : []),
+    ['Thrust', `${fmt(d.thrust / 1000, 1)} kN`], ['Thrust-to-weight', fmt(d.twr, 2)], ['Mass', `${fmt(d.mass)} kg`],
+    ['Propellant', `${fmt(d.fuel * 100)}%`], ['meter', d.fuel * 100, '#F2A541'],
+    ['Predicted apogee', F.clamped ? '—' : apo],
+    ['Downrange', `${fmt(Math.abs(d.downrange) / 1000, 1)} km${Math.abs(d.downrange) > 100 ? (d.downrange > 0 ? ' east' : ' west') : ''}`]];
+  $('#readouts').innerHTML = rows.map(r => r[0] === 'meter' ? `<span style="grid-column:1/3" class="meter"><div style="width:${r[1]}%;background:${r[2]}"></div></span>`
+    : `<span class="k">${r[0]}</span><span class="v">${r[1]}</span>`).join('');
+  if (F.engine !== 'running' && F.engine !== 'ignition') $('#cutBtn').classList.add('hidden');
+  const ob = $('#objective'); ob.classList.toggle('done', F.reached);
+  $('#objText').textContent = F.reached ? 'Payload above 100 km: complete' : `Payload above 100 km: ${fmt(Math.max(0, F.max.alt) / 1000, 1)} km so far`;
+  while (logCount < F.events.length) {
+    const ev = F.events[logCount++], div = document.createElement('div'); div.className = ev.kind;
+    const tt = F.liftoffT === null ? 0 : ev.t - F.liftoffT;
+    div.innerHTML = `<b>T${tt < 0 ? '–' : '+'}${fmt(Math.abs(tt), 1)}</b>${ev.msg}`; $('#log').prepend(div);
+    while ($('#log').children.length > 8) $('#log').lastChild.remove();
+  }
+  if (F.apogeeT !== null && !F.done && $('#banner').classList.contains('hidden'))
+    showBanner(F.reached ? 'Apogee, objective complete' : 'Apogee, short of 100 km', 'The vehicle is falling back. Keep watching at high time warp, or read the report now.', 'View flight report');
+  if (hudTick % 15 === 0) drawTraj();
+}
+function drawTraj() {
+  const cv = $('#traj'), ctx = cv.getContext('2d'), W = 220, H = 150, dpr = window.devicePixelRatio || 1;
+  if (cv.width !== W * dpr) { cv.width = W * dpr; cv.height = H * dpr; }
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+  const tl = F.tele; const maxA = Math.max(120000, F.max.alt * 1.1), maxD = Math.max(20000, ...tl.map(s => Math.abs(s.down))) * 1.1;
+  const X = v => 26 + (v / maxD) * (W - 36) * 0.5 + (W - 36) * 0.5 - 0, Y = v => H - 18 - v / maxA * (H - 30);
+  ctx.font = '11px ' + css('--font'); ctx.fillStyle = 'rgba(234,241,248,.7)';
+  ctx.strokeStyle = 'rgba(234,241,248,.25)'; ctx.beginPath(); ctx.moveTo(26, H - 18); ctx.lineTo(W - 10, H - 18); ctx.stroke();
+  ctx.setLineDash([4, 3]); ctx.strokeStyle = '#6CC4A1'; ctx.beginPath(); ctx.moveTo(26, Y(100000)); ctx.lineTo(W - 10, Y(100000)); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillText('100 km', 28, Y(100000) - 4); ctx.fillText('Altitude against downrange', 8, 13);
+  ctx.strokeStyle = '#F2A541'; ctx.lineWidth = 2; ctx.beginPath();
+  tl.forEach((s, i) => { const x = X(s.down), y = Y(Math.max(0, s.alt)); i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }); ctx.stroke(); ctx.lineWidth = 1;
+}
+
+// ---------- Report ----------
+const CH = [
+  ['alt', 'Altitude', 'km', s => s.alt / 1000], ['speed', 'Velocity', 'm/s', s => s.speed], ['g', 'Acceleration', 'g', s => s.g],
+  ['q', 'Dynamic pressure', 'kPa', s => s.q / 1000], ['mach', 'Mach', '', s => s.mach], ['thrust', 'Thrust', 'kN', s => s.thrust / 1000], ['mass', 'Mass', 'kg', s => s.mass]];
+let chan = 'alt';
+function openReport() {
+  if (!F) return; if (!F.done) F.end();
+  const R = flightReport(F, fAn);
+  if (R.success && !bestDone) { bestDone = true; store.set('aerolab.v01.missionDone', true); }
+  $('#missionFlag').classList.toggle('done', bestDone);
+  const li = a => a.map(x => `<li>${x}</li>`).join('');
+  $('#repL').innerHTML = `<div class="verdict ${R.success ? 'good' : 'bad'}" id="verdict">${R.success ? 'Mission complete' : 'Mission failed'}</div>
+    <div class="cause">${R.cause}</div>
+    <h3>Evidence</h3><ul>${li(R.evidence)}</ul>
+    ${R.factors.length ? `<h3>Contributing factors</h3><ul>${li(R.factors)}</ul>` : ''}
+    <h3>${R.success ? 'Next' : 'What to try'}</h3><ul>${li(R.fixes)}</ul>`;
+  const st = [[fmt(F.max.alt / 1000, 1) + ' km', 'Peak altitude'], [fmt(F.max.q / 1000, 1) + ' kPa', 'Max Q'], [fmt(F.max.g, 1) + ' g', 'Peak acceleration'], [fmt(F.max.mach, 2), 'Peak Mach']];
+  $('#repStats').innerHTML = st.map(([b, s]) => `<div><b>${b}</b><span>${s}</span></div>`).join('');
+  $('#chips').innerHTML = CH.map(c => `<button class="${c[0] === chan ? 'on' : ''}" data-c="${c[0]}">${c[1]}</button>`).join('');
+  $('#chips').querySelectorAll('button').forEach(b => b.onclick = () => { chan = b.dataset.c; $('#chips').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b)); drawChart(); });
+  $('#modal').classList.remove('hidden'); $('#banner').classList.add('hidden');
+  requestAnimationFrame(() => drawChart()); $('#backBtn').focus();
+}
+let hoverX = null;
+function drawChart() {
+  const cv = $('#rcv'), dpr = window.devicePixelRatio || 1, W = cv.clientWidth, H = cv.clientHeight; if (!W) return;
+  cv.width = W * dpr; cv.height = H * dpr; const ctx = cv.getContext('2d'); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const c = CH.find(x => x[0] === chan), tl = F.tele; if (tl.length < 2) return;
+  const t0 = F.liftoffT ?? 0, xs = tl.map(s => s.t - t0), ys = tl.map(c[3]);
+  const lim = chan === 'alt' ? 100 : chan === 'q' ? F.veh.qMax / 1000 : chan === 'g' && F.veh.payloads.length ? F.veh.gMax : null;
+  let ymax = Math.max(...ys, lim ? lim * 1.05 : 0) * 1.08 || 1, ymin = Math.min(0, ...ys);
+  const x0 = Math.min(...xs), x1 = Math.max(...xs), L = 52, B = 30, T = 10, Rm = 12;
+  const X = v => L + (v - x0) / (x1 - x0 || 1) * (W - L - Rm), Y = v => H - B - (v - ymin) / (ymax - ymin) * (H - B - T);
+  const text = css('--text'), muted = css('--muted'), line = css('--line'), acc = css('--accent'), good = css('--good'), bad = css('--bad');
+  ctx.font = '12px ' + css('--font'); ctx.fillStyle = muted; ctx.strokeStyle = line; ctx.lineWidth = 1;
+  const step = niceStep((ymax - ymin) / 5);
+  for (let v0 = Math.ceil(ymin / step) * step; v0 <= ymax; v0 += step) { const v = Math.abs(v0) < 1e-9 ? 0 : v0; ctx.beginPath(); ctx.moveTo(L, Y(v)); ctx.lineTo(W - Rm, Y(v)); ctx.stroke(); ctx.textAlign = 'right'; ctx.fillText(fmt(v, step < 1 ? 1 : 0), L - 6, Y(v) + 4); }
+  const xs2 = niceStep((x1 - x0) / 6);
+  for (let v0 = Math.ceil(x0 / xs2) * xs2; v0 <= x1; v0 += xs2) { const v = Math.abs(v0) < 1e-9 ? 0 : v0; ctx.textAlign = 'center'; ctx.fillText(fmt(v), X(v), H - B + 16); }
+  ctx.textAlign = 'left'; ctx.fillText(`${c[1]}${c[2] ? ', ' + c[2] : ''}`, L + 4, T + 12); ctx.textAlign = 'right'; ctx.fillText('Seconds after lift-off', W - Rm, H - 2);
+  if (lim) { ctx.setLineDash([5, 4]); ctx.strokeStyle = chan === 'alt' ? good : bad; ctx.beginPath(); ctx.moveTo(L, Y(lim)); ctx.lineTo(W - Rm, Y(lim)); ctx.stroke(); ctx.setLineDash([]);
+    ctx.fillStyle = ctx.strokeStyle; ctx.textAlign = 'right'; ctx.fillText(chan === 'alt' ? 'Target' : 'Limit', W - Rm - 4, Y(lim) - 5); }
+  ctx.strokeStyle = acc; ctx.lineWidth = 2; ctx.beginPath(); xs.forEach((x, i) => i ? ctx.lineTo(X(x), Y(ys[i])) : ctx.moveTo(X(x), Y(ys[i]))); ctx.stroke();
+  if (hoverX !== null && hoverX > L) {
+    const tv = x0 + (hoverX - L) / (W - L - Rm) * (x1 - x0); let i = xs.findIndex(x => x >= tv); if (i < 0) i = xs.length - 1;
+    ctx.strokeStyle = muted; ctx.lineWidth = 1; ctx.beginPath(); ctx.moveTo(X(xs[i]), T); ctx.lineTo(X(xs[i]), H - B); ctx.stroke();
+    ctx.fillStyle = acc; ctx.beginPath(); ctx.arc(X(xs[i]), Y(ys[i]), 4, 0, 7); ctx.fill();
+    ctx.fillStyle = text; ctx.textAlign = X(xs[i]) > W - 140 ? 'right' : 'left';
+    ctx.fillText(`T+${fmt(xs[i], 1)} s   ${fmt(ys[i], ys[i] < 10 ? 2 : 1)} ${c[2]}`, X(xs[i]) + (ctx.textAlign === 'left' ? 8 : -8), T + 30);
+  }
+}
+function niceStep(raw) { const p = Math.pow(10, Math.floor(Math.log10(raw || 1))), n = raw / p; return (n < 1.5 ? 1 : n < 3.5 ? 2 : n < 7.5 ? 5 : 10) * p; }
+$('#rcv').addEventListener('pointermove', e => { hoverX = e.clientX - e.target.getBoundingClientRect().left; drawChart(); });
+$('#rcv').addEventListener('pointerleave', () => { hoverX = null; drawChart(); });
+$('#againBtn').onclick = () => { running = false; startFlight(); };
+$('#backBtn').onclick = () => {
+  running = false; F = null; $('#modal').classList.add('hidden'); $('#flight').classList.add('hidden');
+  $('#builder').classList.remove('hidden'); $('#bbar').classList.remove('hidden'); document.querySelector('.top').classList.remove('hidden'); drawBuilder();
+};
+$('#modal').addEventListener('keydown', e => { if (e.key === 'Escape') $('#backBtn').click(); });
+$('#launchBtn').onclick = () => { if (analyze(design).valid) startFlight(); };
+
+// ---------- Boot ----------
+$('#dname').value = design.name || 'Sounder';
+$('#missionFlag').classList.toggle('done', bestDone);
+renderPalette(); refreshLoad(); update();
+if (document.fonts) document.fonts.ready.then(drawBuilder);
+
+</script>
+</body>
+</html>

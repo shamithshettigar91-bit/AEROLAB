@@ -1,0 +1,21 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "AeroLab: Streamlit dashboard",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "streamlit",
+      "args": ["run", "dashboard/Home.py", "--server.runOnSave", "true"],
+      "cwd": "${workspaceFolder}",
+      "justMyCode": true
+    },
+    {
+      "name": "AeroLab: flight tests (Node)",
+      "type": "node",
+      "request": "launch",
+      "program": "${workspaceFolder}/tests/flight-tests.js",
+      "cwd": "${workspaceFolder}"
+    }
+  ]
+}
